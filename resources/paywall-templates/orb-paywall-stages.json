@@ -1,0 +1,611 @@
+[
+  {
+    "provides": [
+      "info"
+    ],
+    "template": {
+      "slots": {
+        "promo": {
+          "style": {
+            "backgroundSize": "cover",
+            "backgroundImage": "url(saruman.jpg)",
+            "backgroundRepeat": "no-repeat",
+            "backgroundPosition": "center"
+          },
+          "blocks": []
+        },
+        "action": {
+          "style": {
+            "padding": "1rem",
+            "textAlign": "center"
+          },
+          "blocks": [
+            {
+              "id": "p",
+              "text": [
+                {
+                  "href": null,
+                  "props": {
+                    "link": null,
+                    "content": "Cancel or downgrade anytime, no questions asked"
+                  },
+                  "object": "text",
+                  "plain_text": "Cancel or downgrade anytime, no questions asked",
+                  "annotations": {
+                    "bold": false
+                  }
+                }
+              ],
+              "type": "p",
+              "props": [],
+              "style": {
+                "color": "#999",
+                "fontSize": "0.8rem",
+                "marginBottom": "1rem"
+              },
+              "object": "block"
+            },
+            {
+              "id": "action-block",
+              "text": [
+                {
+                  "href": null,
+                  "props": {
+                    "link": null,
+                    "content": "Upgrade Now"
+                  },
+                  "object": "text",
+                  "plain_text": "",
+                  "annotations": {
+                    "bold": true
+                  }
+                }
+              ],
+              "type": "button",
+              "props": {
+                "type": "submit"
+              },
+              "style": {
+                "background-color": "#C428D3"
+              },
+              "object": "action"
+            }
+          ]
+        },
+        "content": {
+          "style": {
+            "fontFamily": "Lato, sans-serif"
+          },
+          "blocks": [
+            {
+              "id": "h1",
+              "text": [
+                {
+                  "props": {
+                    "link": null,
+                    "color": "#FFD000",
+                    "icon": "crown",
+                    "variant": "solid"
+                  },
+                  "object": "icon"
+                },
+                {
+                  "href": null,
+                  "props": {
+                    "link": null,
+                    "content": "Upgrade to use this featureX"
+                  },
+                  "object": "text",
+                  "annotations": {
+                    "bold": true
+                  }
+                }
+              ],
+              "type": "h4",
+              "props": [],
+              "object": "block"
+            },
+            {
+              "id": "123h",
+              "text": [
+                {
+                  "href": null,
+                  "props": {
+                    "link": null,
+                    "content": "Everything you need to run your orc empire"
+                  },
+                  "object": "text",
+                  "plain_text": "",
+                  "annotations": {
+                    "bold": true
+                  }
+                }
+              ],
+              "type": "h1",
+              "props": [],
+              "object": "block"
+            },
+            {
+              "id": "123",
+              "text": [
+                {
+                  "href": null,
+                  "props": {
+                    "link": null,
+                    "content": "For serious magicians looking for unlimited access to other palantir holders, the dark lord and dominion over the free peoples of Middle-earth."
+                  },
+                  "object": "text",
+                  "plain_text": "",
+                  "annotations": {
+                    "bold": false
+                  }
+                }
+              ],
+              "type": "p",
+              "props": [],
+              "object": "block"
+            },
+            {
+              "id": "",
+              "text": [
+                {
+                  "href": null,
+                  "props": {
+                    "link": null,
+                    "content": "Here’s what you get with the Unlimited plan"
+                  },
+                  "object": "text",
+                  "plain_text": "",
+                  "annotations": {
+                    "bold": true
+                  }
+                }
+              ],
+              "type": "p",
+              "props": [],
+              "object": "block"
+            },
+            {
+              "id": "123dl",
+              "type": "dl",
+              "props": {
+                "defaultIcon": ""
+              },
+              "style": {
+
+              },
+              "object": "block",
+              "children": [
+                {
+                  "id": "123dt",
+                  "text": [
+                    {
+                      "href": null,
+                      "props": {
+                        "link": null,
+                        "content": "Instant communication to other Palantir holders"
+                      },
+                      "object": "text",
+                      "plain_text": "",
+                      "annotations": []
+                    }
+                  ],
+                  "type": "dt",
+                  "props": {
+                    "icon": "check",
+                    "width": "6",
+                    "variant": "solid"
+                  },
+                  "object": "block"
+                },
+                {
+                  "id": "123dd",
+                  "text": [
+                    {
+                      "href": null,
+                      "props": {
+                        "link": null,
+                        "content": "See into places far off, or events in the past"
+                      },
+                      "object": "text",
+                      "plain_text": "",
+                      "annotations": {
+                        "bold": false
+                      }
+                    }
+                  ],
+                  "type": "dd",
+                  "props": {
+                    "icon": "check",
+                    "width": "6",
+                    "variant": "solid"
+                  },
+                  "object": "block"
+                },
+                {
+                  "id": "123dd",
+                  "text": [
+                    {
+                      "href": null,
+                      "props": {
+                        "link": null,
+                        "content": "Hotline to the Dark Lord"
+                      },
+                      "object": "text",
+                      "plain_text": "",
+                      "annotations": {
+                        "bold": false
+                      }
+                    }
+                  ],
+                  "type": "dd",
+                  "props": {
+                    "icon": "check",
+                    "width": "6",
+                    "variant": "solid"
+                  },
+                  "object": "block"
+                },
+                {
+                  "id": "123dd",
+                  "text": [
+                    {
+                      "href": null,
+                      "props": {
+                        "link": null,
+                        "content": "Route to power and dominion over Middle-earth"
+                      },
+                      "object": "text",
+                      "plain_text": "",
+                      "annotations": {
+                        "bold": false
+                      }
+                    }
+                  ],
+                  "type": "dd",
+                  "props": {
+                    "icon": "check",
+                    "width": "6",
+                    "variant": "solid"
+                  },
+                  "object": "block"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "layout": "split-checkout-v1"
+    }
+  },
+  {
+    "provides": [
+      "start",
+      "commit",
+      "pm_collection",
+      "li_customization"
+    ],
+    "template": {
+      "slots": {
+        "promo": {
+          "style": {
+            "backgroundSize": "cover",
+            "backgroundImage": "url(ugluk.jpg)",
+            "backgroundRepeat": "no-repeat",
+            "backgroundPosition": "center"
+          },
+          "blocks": []
+        },
+        "title": {
+          "blocks": [
+            {
+              "id": "h4",
+              "text": [
+                {
+                  "href": null,
+                  "props": {
+                    "link": null,
+                    "content": "Upgrade to the Unlimited plan"
+                  },
+                  "object": "text",
+                  "annotations": {
+                    "bold": true
+                  }
+                }
+              ],
+              "type": "h1",
+              "props": [],
+              "object": "block"
+            }
+          ]
+        },
+        "action": {
+          "style": {
+            "padding": "1rem",
+            "textAlign": "center"
+          },
+          "blocks": [
+            {
+              "id": "action-block",
+              "text": [
+                {
+                  "href": null,
+                  "props": {
+                    "link": null,
+                    "content": "Subscribe Now"
+                  },
+                  "object": "text",
+                  "plain_text": "",
+                  "annotations": {
+                    "bold": true
+                  }
+                }
+              ],
+              "type": "button",
+              "props": {
+                "type": "submit"
+              },
+              "style": {
+                "background-color": "#C428D3"
+              },
+              "object": "action"
+            }
+          ]
+        },
+        "content": {
+          "blocks": [
+            {
+              "id": "ivs",
+              "type": "IntervalSelector@v1",
+              "props": [],
+              "object": "block"
+            },
+            {
+              "id": "pls",
+              "type": "PlanDescriptor@v1",
+              "props": {
+                "plan": "growth-lite"
+              },
+              "object": "block"
+            },
+            {
+              "id": "stripe",
+              "type": "StripeElements@v1",
+              "props": {
+                "width": "full"
+              },
+              "object": "block"
+            }
+          ]
+        }
+      },
+      "layout": "split-checkout-v1"
+    }
+  },
+  {
+    "provides": [
+      "success"
+    ],
+    "template": {
+      "slots": {
+        "promo": {
+          "style": {
+            "backgroundSize": "cover",
+            "backgroundImage": "url(happy-saruman.jpg)",
+            "backgroundRepeat": "no-repeat",
+            "backgroundPosition": "center"
+          },
+          "blocks": []
+        },
+        "action": {
+          "style": {
+            "padding": "1rem"
+          },
+          "blocks": [
+            {
+              "id": "action-block",
+              "text": [
+                {
+                  "href": null,
+                  "props": {
+                    "link": null,
+                    "content": "Chat with the Orb"
+                  },
+                  "object": "text",
+                  "plain_text": "",
+                  "annotations": {
+                    "bold": true
+                  }
+                }
+              ],
+              "type": "button",
+              "props": {
+                "type": "submit"
+              },
+              "object": "action"
+            }
+          ]
+        },
+        "content": {
+          "blocks": [
+            {
+              "id": "h3",
+              "text": [
+                {
+                  "href": null,
+                  "props": {
+                    "link": null,
+                    "content": "CONGRATULATIONS, UPGRADE SUCCESSFUL"
+                  },
+                  "object": "text",
+                  "plain_text": "",
+                  "annotations": {
+                    "bold": true
+                  }
+                }
+              ],
+              "type": "h3",
+              "props": [],
+              "style": {
+                "color": "#ABAAAA",
+                "text-transform": "uppercase"
+              },
+              "object": "block"
+            },
+            {
+              "id": "h4",
+              "text": [
+                {
+                  "href": null,
+                  "props": {
+                    "link": null,
+                    "content": "Welcome to your new unlimited plan!"
+                  },
+                  "object": "text",
+                  "plain_text": "",
+                  "annotations": {
+                    "bold": true
+                  }
+                }
+              ],
+              "type": "h1",
+              "props": [],
+              "object": "block"
+            },
+            {
+              "id": "123p",
+              "text": [
+                {
+                  "href": null,
+                  "props": {
+                    "link": null,
+                    "content": "You’ve just given your empire a massive competitive edge"
+                  },
+                  "style": {
+                    "backgroundColor": "white"
+                  },
+                  "object": "text",
+                  "plain_text": "",
+                  "annotations": {
+                    "bold": false
+                  }
+                }
+              ],
+              "type": "p",
+              "props": [],
+              "object": "block"
+            },
+            {
+              "id": "123dl",
+              "type": "dl",
+              "props": {
+                "defaultIcon": ""
+              },
+              "style": {
+
+              },
+              "object": "block",
+              "children": [
+                {
+                  "id": "123dt",
+                  "text": [
+                    {
+                      "href": null,
+                      "props": {
+                        "link": null,
+                        "content": "Instant communication to other Palantir holders"
+                      },
+                      "object": "text",
+                      "plain_text": "",
+                      "annotations": []
+                    }
+                  ],
+                  "type": "dt",
+                  "props": {
+                    "icon": "check",
+                    "width": "6",
+                    "variant": "solid"
+                  },
+                  "object": "block"
+                },
+                {
+                  "id": "123dd",
+                  "text": [
+                    {
+                      "href": null,
+                      "props": {
+                        "link": null,
+                        "content": "See into places far off, or events in the past"
+                      },
+                      "object": "text",
+                      "plain_text": "",
+                      "annotations": {
+                        "bold": false
+                      }
+                    }
+                  ],
+                  "type": "dd",
+                  "props": {
+                    "icon": "check",
+                    "width": "6",
+                    "variant": "solid"
+                  },
+                  "object": "block"
+                },
+                {
+                  "id": "123dd",
+                  "text": [
+                    {
+                      "href": null,
+                      "props": {
+                        "link": null,
+                        "content": "Hotline to the Dark Lord"
+                      },
+                      "object": "text",
+                      "plain_text": "",
+                      "annotations": {
+                        "bold": false
+                      }
+                    }
+                  ],
+                  "type": "dd",
+                  "props": {
+                    "icon": "check",
+                    "width": "6",
+                    "variant": "solid"
+                  },
+                  "object": "block"
+                },
+                {
+                  "id": "123dd",
+                  "text": [
+                    {
+                      "href": null,
+                      "props": {
+                        "link": null,
+                        "content": "Route to power and dominion over Middle-earth"
+                      },
+                      "object": "text",
+                      "plain_text": "",
+                      "annotations": {
+                        "bold": false
+                      }
+                    }
+                  ],
+                  "type": "dd",
+                  "props": {
+                    "icon": "check",
+                    "width": "6",
+                    "variant": "solid"
+                  },
+                  "object": "block"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "layout": "split-checkout-v1"
+    }
+  }
+]

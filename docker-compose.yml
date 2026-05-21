@@ -1,0 +1,44 @@
+services:
+  php-fpm:
+    build:
+      context: .
+      target: php-fpm
+    environment:
+      - APP_KEY=base64:XceUL4Hpdirw6vd09iC/UPt0t91NVfGzAfRVKYhTNLE=
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=api
+      - DB_USERNAME=app_api
+      - DB_PASSWORD=api
+      - APP_DEBUG=true
+    ports:
+      - "9000:9000"
+
+  nginx:
+    build:
+      context: .
+      target: nginx
+    depends_on:
+      - php-fpm
+    ports:
+      - "80:80"
+    network_mode: "host"
+
+  mysql:
+    image: mysql:8.0
+#    profiles:
+#      - test
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=api
+      - MYSQL_USER=app_api
+      - MYSQL_PASSWORD=api
+      - DB_USE_IAM_AUTH=0
+    expose:
+      - 3306/tcp
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3

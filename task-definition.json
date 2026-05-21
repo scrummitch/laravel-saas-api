@@ -1,0 +1,303 @@
+{
+    "family": "api",
+    "containerDefinitions": [
+      {
+        "name": "nginx",
+        "cpu": 256,
+        "memory": 512,
+        "image": "",
+        "portMappings": [
+          {
+            "containerPort": 80
+          }
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "/ecs/api/nginx",
+            "awslogs-region": "us-east-1",
+            "awslogs-stream-prefix": "nginx",
+            "mode": "non-blocking"
+          }
+        },
+        "dependsOn": [
+          {
+            "containerName": "php-fpm",
+            "condition": "START"
+          }
+        ],
+        "essential": true
+      },
+      {
+        "name": "php-fpm",
+        "image": "",
+        "portMappings": [
+          {
+            "containerPort": 9000
+          }
+        ],
+        "environment": [
+          {
+            "name": "DB_USE_IAM_AUTH",
+            "value": "false"
+          },
+          {
+            "name": "MYSQL_ATTR_SSL_CA",
+            "value": "/etc/ssl/certs/ca-certificates.crt"
+          },
+          {
+            "name": "LOG_CHANNEL",
+            "value": "ecs"
+          },
+          {
+            "name": "QUEUE_CONNECTION",
+            "value": "database"
+          },
+          {
+            "name": "SESSION_DRIVER",
+            "value": "database"
+          },
+          {
+            "name": "SESSION_LIFETIME",
+            "value": "2592000"
+          },
+          {
+            "name": "SESSION_SAME_SITE",
+            "value": "none"
+          },
+          {
+            "name": "SESSION_SECURE_COOKIE",
+            "value": "1"
+          },
+          {
+            "name": "MEDIA_FILESYSTEM_DISK",
+            "value": "s3"
+          },
+          {
+            "name": "CACHE_DRIVER",
+            "value": "dynamodb"
+          },
+          {
+            "name": "SENTRY_LARAVEL_DSN",
+            "value": "https://86b53b3ad77ad393171ab35d5ec5840e@o4507802068058112.ingest.us.sentry.io/4507943333003264"
+          },
+          {
+            "name": "SENTRY_TRACES_SAMPLE_RATE",
+            "value": "0.1"
+          },
+          {
+            "name": "SLACK_WEBHOOK_URL",
+            "value": "REDACTED_SEE_SSM"
+          }
+        ],
+        "secrets": [
+          {
+            "name": "APP_KEY",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/app_key"
+          },
+          {
+            "name": "APP_URL",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/app_url"
+          },
+          {
+            "name": "CORS_ALLOWED_ORIGINS",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/cors_allowed_origins"
+          },
+          {
+            "name": "MEDIA_FILESYSTEM_BUCKET",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/media_filesystem_bucket"
+          },
+          {
+            "name": "SANCTUM_STATEFUL_DOMAINS",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/sanctum_stateful_domains"
+          },
+          {
+            "name": "SESSION_DOMAIN",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/session_domain"
+          },
+          {
+            "name": "DB_HOST",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/db/host"
+          },
+          {
+            "name": "DB_PASSWORD",
+            "valueFrom":"arn:aws:ssm:us-east-1:${account_id}:parameter/api/db/password"
+          },
+          {
+            "name": "DB_USERNAME",
+            "valueFrom":"arn:aws:ssm:us-east-1:${account_id}:parameter/api/db/username"
+          },
+          {
+            "name": "STRIPE_LIVE_CLIENT_ID",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/stripe/live/client_id"
+          },
+          {
+            "name": "STRIPE_LIVE_CLIENT_SECRET",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/stripe/live/client_secret"
+          },
+          {
+            "name": "STRIPE_LIVE_WEBHOOK_ID",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/stripe/live/webhook_id"
+          },
+          {
+            "name": "STRIPE_LIVE_WEBHOOK_SECRET",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/stripe/live/webhook_secret"
+          },
+          {
+            "name": "STRIPE_TEST_CLIENT_ID",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/stripe/test/client_id"
+          },
+          {
+            "name": "STRIPE_TEST_CLIENT_SECRET",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/stripe/test/client_secret"
+          },
+          {
+            "name": "STRIPE_TEST_WEBHOOK_ID",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/stripe/test/webhook_id"
+          },
+          {
+            "name": "STRIPE_TEST_WEBHOOK_SECRET",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/stripe/test/webhook_secret"
+          },
+          {
+            "name": "DYNAMODB_CACHE_TABLE",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/cache/ddb_table"
+          },
+          {
+            "name": "DEMO_ORGANIZATION",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/demo_organization_id"
+          },
+          {
+            "name": "PLANDALF_SECRET",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/plandalf/secret"
+          },
+          {
+            "name": "PLANDALF_CLIENT_ID",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/plandalf/client_id"
+          }
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "/ecs/api/php-fpm",
+            "awslogs-region": "us-east-1",
+            "awslogs-stream-prefix": "php",
+            "mode": "non-blocking"
+          }
+        },
+        "essential": true
+      },
+      {
+        "name": "php-worker",
+        "cpu": 512,
+        "memory": 1024,
+        "image": "",
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "/ecs/api/php-worker",
+            "awslogs-region": "us-east-1",
+            "awslogs-stream-prefix": "php",
+            "mode": "non-blocking"
+          }
+        },
+        "environment": [
+          {
+            "name": "APP_ENV",
+            "value": "production"
+          },
+          {
+            "name": "DB_USE_IAM_AUTH",
+            "value": "false"
+          },
+          {
+            "name": "LOG_CHANNEL",
+            "value": "ecs"
+          },
+          {
+            "name": "MYSQL_ATTR_SSL_CA",
+            "value": "/etc/ssl/certs/ca-certificates.crt"
+          },
+          {
+            "name": "MEDIA_FILESYSTEM_DISK",
+            "value": "s3"
+          },
+          {
+            "name": "QUEUE_CONNECTION",
+            "value": "database"
+          },
+          {
+            "name": "CACHE_DRIVER",
+            "value": "dynamodb"
+          },
+          {
+            "name": "SENTRY_LARAVEL_DSN",
+            "value": "https://86b53b3ad77ad393171ab35d5ec5840e@o4507802068058112.ingest.us.sentry.io/4507943333003264"
+          },
+          {
+            "name": "SENTRY_TRACES_SAMPLE_RATE",
+            "value": "0.1"
+          },
+          {
+            "name": "SLACK_WEBHOOK_URL",
+            "value": "REDACTED_SEE_SSM"
+          }
+        ],
+        "secrets": [
+          {
+            "name": "APP_KEY",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/app_key"
+          },
+          {
+            "name": "DB_HOST",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/db/host"
+          },
+          {
+            "name": "DB_PASSWORD",
+            "valueFrom":"arn:aws:ssm:us-east-1:${account_id}:parameter/api/db/password"
+          },
+          {
+            "name": "STRIPE_LIVE_CLIENT_SECRET",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/stripe/live/client_secret"
+          },
+          {
+            "name": "DB_USERNAME",
+            "valueFrom":"arn:aws:ssm:us-east-1:${account_id}:parameter/api/db/username"
+          },
+          {
+            "name": "STRIPE_TEST_CLIENT_SECRET",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/stripe/test/client_secret"
+          },
+          {
+            "name": "DYNAMODB_CACHE_TABLE",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/cache/ddb_table"
+          },
+          {
+            "name": "DEMO_ORGANIZATION",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/demo_organization_id"
+          },
+          {
+            "name": "PLANDALF_SECRET",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/plandalf/secret"
+          },
+          {
+            "name": "PLANDALF_CLIENT_ID",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/plandalf/client_id"
+          },
+          {
+            "name": "HEARTBEAT_URL",
+            "valueFrom": "arn:aws:ssm:us-east-1:${account_id}:parameter/api/heartbeat_url"
+          }
+        ],
+        "essential": true
+      }
+    ],
+    "executionRoleArn": "arn:aws:iam::${account_id}:role/ecs-exec-api",
+    "taskRoleArn": "arn:aws:iam::${account_id}:role/ecs-task-api",
+    "cpu": "2048",
+    "memory": "4096",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": [
+      "FARGATE"
+    ]
+  }

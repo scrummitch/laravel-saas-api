@@ -1,0 +1,168 @@
+<?php
+
+namespace App\Providers;
+
+use App\Console\Kernel as ConsoleKernel;
+use App\Http\Kernel as HttpKernel;
+use App\Models\Billing\BillingProvider;
+use App\Models\Billing\Subscription;
+use App\Models\Catalog\FeatureSet;
+use App\Models\Catalog\Inclusion;
+use App\Models\Catalog\Product;
+use App\Models\Convert\Flow;
+use App\Models\Intelligence\Activity;
+use App\Models\Intelligence\Scenario;
+use App\Models\Management\Operation;
+use App\Models\Management\Organization;
+use App\Models\Pricing\Scheme;
+use App\Models\Publish\Rollout;
+use App\Models\Stats\Collector;
+use App\Models\Store\Purchase;
+use Illuminate\Database\Connection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        $this->bootModelRules();
+        $this->bootMorphMap();
+        $this->bootSlowQueryListeners();
+
+        $this->app->bind(Organization::class, function ($app) {
+            return $app->make(Request::class)->user()?->currentOrganization;
+        });
+    }
+
+    private function bootModelRules(): void
+    {
+        // As these are concerned with application correctness,
+        // leave them enabled all the time.
+        Model::preventAccessingMissingAttributes();
+        Model::preventSilentlyDiscardingAttributes();
+
+        // Since this is a performance concern only, don’t halt
+        // production for violations.
+        Model::preventLazyLoading();
+
+        // But in production, log the violation instead of throwing an exception.
+        if ($this->app->isProduction()) {
+            Model::handleLazyLoadingViolationUsing(function ($model, $relation) {
+                Log::notice('AppServiceProvider@boot.handleLazyLoadingViolationUsing', [
+                    'message' => 'Attempted to lazy load',
+                    'relation' => $relation,
+                    'model' => get_class($model),
+                    'path' => $this->app->runningInConsole() ? null : request()->path(),
+                ]);
+            });
+        }
+    }
+
+    private function bootMorphMap(): void
+    {
+        Relation::enforceMorphMap([
+            // mgmt
+            'user' => \App\Models\User::class,
+            'client' => \App\Models\Client::class,
+            'organization' => \App\Models\Management\Organization::class,
+            'operation' => Operation::class,
+            'twin' => \App\Models\Twin::class,
+
+            // account
+            'customer' => \App\Models\Account\Customer::class,
+            'agent' => \App\Models\Account\Agent::class,
+
+            // catalog
+            'scheme' => Scheme::class,
+            'product' => Product::class,
+            'feature_set' => FeatureSet::class,
+            'feature' => \App\Models\Catalog\Feature::class,
+            'product_family' => \App\Models\Catalog\ProductFamily::class,
+            'inclusion' => Inclusion::class,
+
+            // pricing
+            'plan' => \App\Models\Pricing\Plan::class,
+            'package' => \App\Models\Pricing\Package::class,
+
+            // billing
+            'charge' => \App\Models\Billing\Charge::class,
+            'billing_provider' => BillingProvider::class,
+            'schedule' => \App\Models\Billing\Schedule::class,
+            'subscription' => Subscription::class,
+
+            'collector' => Collector::class,
+            'activity' => Activity::class,
+
+            // convert
+            'workflow' => \App\Models\Convert\Flow::class,
+            'scenario' => Scenario::class,
+            'purchase' => Purchase::class,
+            'theme' => \App\Models\Convert\Theme::class,
+
+            // usage
+            'metric' => \App\Models\Usage\Metric::class,
+
+            // media
+            'asset' => \App\Models\Media\Asset::class,
+        ]);
+    }
+
+    private function bootSlowQueryListeners(): void
+    {
+        // Log a warning if we spend more than a total of 2000ms querying.
+        DB::whenQueryingForLongerThan(2000, function (Connection $connection) {
+            Log::warning("Database queries exceeded 2 seconds on {$connection->getName()}");
+        });
+
+        // Log a warning if we spend more than 1000ms on a single query.
+        DB::listen(function (QueryExecuted $query) {
+            if ($query->time > 1000) {
+                Log::warning('An individual database query exceeded 1 second.', array_filter([
+                    'sql' => $query->sql,
+                    'time' => $query->time,
+                    'bindings' => $query->bindings,
+                    'request' => ! app()->runningInConsole() ? request()->method().' '.request()->url() : null,
+                ]));
+            }
+        });
+
+        if ($this->app->runningInConsole()) {
+            // Log slow commands.
+            $this->app[ConsoleKernel::class]->whenCommandLifecycleIsLongerThan(
+                5000,
+                function ($startedAt, $input, $status) {
+                    Log::warning('A command took longer than 5 seconds.');
+                }
+            );
+        } else {
+            // Log slow requests.
+            $this->app[HttpKernel::class]->whenRequestLifecycleIsLongerThan(
+                1000,
+                function ($startedAt, $request, $response) {
+                    Log::warning('A request took longer than 5 seconds.', [
+                        'method' => $request->method(),
+                        'url' => $request->url(),
+                        'response_status' => $response->getStatusCode(),
+                    ]);
+                }
+            );
+        }
+    }
+}

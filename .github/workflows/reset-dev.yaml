@@ -1,0 +1,26 @@
+name: Reset Dev
+
+on:
+  schedule:
+    - cron: "0 18 * * 0" # Every Monday at 04:00 UTC+10
+  workflow_dispatch: # Run on demand
+
+permissions:
+  contents: write
+
+jobs:
+  reset-dev:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Overwrite dev branch
+        run: |
+          git checkout dev
+          git reset --hard main
+          git push origin dev --force

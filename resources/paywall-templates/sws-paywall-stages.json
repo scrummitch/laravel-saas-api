@@ -1,0 +1,709 @@
+[
+    {
+      "provides": [
+          "info"
+      ],
+      "name": "Unlimited Plan Intro",
+      "layout": {
+        "sm": "split-checkout@v1"
+      },
+      "view": {
+        "promo": {
+          "style": {
+            "background": "linear-gradient(180deg, #1C7EC0 0%, #2394DF 100%)",
+            "display": "flex",
+            "flexDirection": "column",
+            "justifyContent": "center",
+            "alignItems": "center",
+            "position": "relative"
+          },
+          "blocks": [
+            {
+              "id": "promo",
+              "type": "img",
+              "object": "block",
+              "props": {
+                "src": "http://localhost:8000/assets/asset_1CCynAriQvMwVrCfEEVUrz/2274b427d20148c0bea3bd5e2eed900c.png"
+              },
+              "style": {
+                "width": "80%"
+              }
+            },
+            {
+              "id": "promo",
+              "type": "img",
+              "object": "block",
+              "props": {
+                "src": "http://localhost:8000/assets/asset_1CCymqAJMwmLxY1V27ULZh/0cc263caba2f4a1a87d876a3af847727.jpg"
+              },
+              "style": {
+                "position": "absolute",
+                "bottom": 0
+              }
+            }
+          ]
+        },
+        "action": {
+          "style": {
+            "padding": "1rem",
+            "textAlign": "center"
+          },
+          "blocks": [
+            {
+              "id": "action-block",
+              "text": [
+                {
+                  "object": "icon",
+                  "type": "icon",
+                  "props": {
+                    "icon": "gem",
+                    "variant": "regular",
+                    "size": 10
+                  }
+                },
+                {
+                  "href": null,
+                  "props": {
+                    "link": null,
+                    "content": "Upgrade Now"
+                  },
+                  "object": "text",
+                  "plain_text": "",
+                  "annotations": {
+                    "bold": true
+                  }
+                }
+              ],
+              "type": "button",
+              "props": {
+                "type": "submit"
+              },
+              "style": {
+                "backgroundColor": "#C428D3"
+              },
+              "object": "action"
+            },
+            {
+              "id": "p",
+              "text": [
+                {
+                  "href": null,
+                  "props": {
+                    "content": "billed monthly ⋅ cancel anytime"
+                  },
+                  "object": "text",
+                  "annotations": {
+                    "bold": false,
+                    "color": "#2394DF"
+                  }
+                }
+              ],
+              "type": "p",
+              "props": [],
+              "style": {
+              },
+              "object": "block"
+            }
+          ]
+        },
+        "title": {
+          "blocks": [
+            {
+              "id": "123h",
+              "text": [
+                {
+                  "href": null,
+                  "props": {
+                    "link": null,
+                    "content": "Upgrade to Unlimited"
+                  },
+                  "object": "text",
+                  "plain_text": "",
+                  "annotations": {
+                    "bold": true
+                  }
+                }
+              ],
+              "type": "h1",
+              "props": [],
+              "object": "block"
+            }
+          ]
+        },
+        "content": {
+          "style": {
+            "fontFamily": "Lato, sans-serif"
+          },
+          "blocks": [
+            {
+              "type": "dl",
+              "props": {
+                "defaultIcon": ""
+              },
+              "style": {
+              },
+              "object": "block",
+              "children": [
+                {
+                  "type": "dl-group",
+                  "object": "block",
+                  "children": [
+                    {
+                      "id": "dt",
+                      "type": "dt",
+                      "object": "block",
+                      "props": {
+                        "icon": "lightbulb",
+                        "size": 10,
+                        "variant": "regular"
+                      },
+                      "style": {
+                        "color": "#2394DF",
+                        "backgroundColor": "white",
+                        "borderRadius": "8px"
+                      }
+                    },
+                    {
+                      "id": "dd",
+                      "type": "dd",
+                      "children": [
+                        {
+                          "id": "123h3",
+                          "type": "h2",
+                          "object": "block",
+                          "text": [
+                            {
+                              "href": null,
+                              "props": {
+                                "content": "Unlimited Company Reports"
+                              },
+                              "object": "text",
+                              "plain_text": "",
+                              "annotations": {
+                                "bold": true
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "id": "123dd",
+                          "type": "p",
+                          "text": [
+                            {
+                              "href": null,
+                              "props": {
+                                "content": "Duis eget libero quam. Nulla consequat vehicula turpis. Etiam sagittis volutpat risus, in tincidunt lorem dignissim id. Duis eu tincidunt leo. In molestie feugiat lorem."
+                              },
+                              "object": "text",
+                              "plain_text": "",
+                              "annotations": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "123dt",
+                  "type": "dl-group",
+                  "object": "block",
+                  "children": [
+                    {
+                      "id": "dt",
+                      "type": "dt",
+                      "object": "block",
+                      "props": {
+                        "icon": "file-lines",
+                        "size": 10,
+                        "variant": "regular"
+                      },
+                      "style": {
+                        "color": "#2394DF",
+                        "backgroundColor": "white",
+                        "borderRadius": "8px"
+                      }
+                    },
+                    {
+                      "id": "dd",
+                      "type": "dd",
+                      "children": [
+                        {
+                          "id": "123h3",
+                          "type": "h2",
+                          "object": "block",
+                          "text": [
+                            {
+                              "href": null,
+                              "props": {
+                                "content": "5 portfolios, Unlimited holdings"
+                              },
+                              "object": "text",
+                              "plain_text": "",
+                              "annotations": {
+                                "bold": true
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "id": "123dd",
+                          "type": "p",
+                          "text": [
+                            {
+                              "href": null,
+                              "props": {
+                                "content": "Track all your portfolios in a single place for huge time savings and comparrison"
+                              },
+                              "object": "text",
+                              "plain_text": "",
+                              "annotations": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "123dt",
+                  "type": "dl-group",
+                  "object": "block",
+                  "children": [
+                    {
+                      "id": "dt",
+                      "type": "dt",
+                      "object": "block",
+                      "props": {
+                        "icon": "infinity",
+                        "size": 10,
+                        "variant": "solid"
+                      },
+                      "style": {
+                        "color": "#2394DF",
+                        "backgroundColor": "white",
+                        "borderRadius": "8px"
+                      }
+                    },
+                    {
+                      "id": "dd",
+                      "type": "dd",
+                      "children": [
+                        {
+                          "id": "123h3",
+                          "type": "h2",
+                          "object": "block",
+                          "text": [
+                            {
+                              "href": null,
+                              "props": {
+                                "content": "10 Stock Screeners & Alerts"
+                              },
+                              "object": "text",
+                              "plain_text": "",
+                              "annotations": {
+                                "bold": true
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "id": "123dd",
+                          "type": "p",
+                          "text": [
+                            {
+                              "href": null,
+                              "props": {
+                                "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras tempus metus at ligula fringilla iaculis. "
+                              },
+                              "object": "text",
+                              "plain_text": "",
+                              "annotations": []
+                            }
+                          ]
+                        },
+                        {
+                          "id": "123dd",
+                          "type": "p",
+                          "text": [
+                            {
+                              "href": "https://www.google.com/hello",
+                              "props": {
+                                "content": "View all 68 features"
+                              },
+                              "object": "text",
+                              "plain_text": "",
+                              "annotations": {
+                                "underline": true,
+                                "color": "#116EAB"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "provides": [
+            "start",
+            "commit",
+            "pm_collection",
+            "li_customization"
+        ],
+      "name": "Subscribe to the Unlimited plan",
+      "layout": {
+        "sm": "split-checkout@v1"
+      },
+      "view": {
+            "promo": {
+                "style": {
+                  "backgroundImage": "url(http://localhost:8000/assets/asset_1CCymRJUrCtN4enMQCnD62/71069dde770a479d8a41d1575c187476.jpg)",
+                  "backgroundColor": "white",
+                  "backgroundSize": "cover"
+                },
+                "blocks": []
+            },
+            "title": {
+              "blocks": [
+                {
+                  "id": "titleText",
+                  "text": [
+                    {
+                      "props": {
+                        "content": "Subscribe to the Unlimited plan"
+                      },
+                      "object": "text",
+                      "annotations": {
+                        "bold": true
+                      }
+                    }
+                  ],
+                  "type": "h1",
+                  "object": "block"
+                }
+              ]
+            },
+            "action": {
+                "style": {
+                    "padding": "1rem",
+                    "textAlign": "center"
+                },
+                "blocks": [
+                  {
+                      "id": "action-block",
+                      "text": [
+                          {
+                              "href": null,
+                              "props": {
+                                  "link": null,
+                                  "content": "Subscribe Now"
+                              },
+                              "object": "text",
+                              "plain_text": "",
+                              "annotations": {
+                                  "bold": true
+                              }
+                          }
+                      ],
+                      "type": "button",
+                      "props": {
+                          "type": "submit"
+                      },
+                      "style": {
+                          "background-color": "#C428D3"
+                      },
+                      "object": "action"
+                  },
+                  {
+                    "id": "p",
+                    "text": [
+                      {
+                        "href": null,
+                        "props": {
+                          "content": "By continuing, you agree to the Terms of Use applicable to Simply Wall St Unlimited and confirm you have read our Privacy Policy."
+                        },
+                        "object": "text",
+                        "annotations": {
+                          "bold": false
+                        }
+                      }
+                    ],
+                    "type": "p",
+                    "props": {},
+                    "style": {
+                      "fontSize": "0.8rem",
+                      "color": "#999999"
+                    },
+                    "object": "block"
+                  }
+                ]
+            },
+            "content": {
+                "blocks": [
+                    {
+                        "id": "ivs",
+                        "type": "IntervalSelector@v1",
+                        "props": [],
+                        "object": "block"
+                    },
+                    {
+                      "id": "pls",
+                      "type": "CheckoutSummary@v1",
+                      "props": {
+                        "variant": "ticketx"
+                      },
+                      "style": {
+                        "border": "1px solid #2394DF",
+                        "padding": 16,
+                        "backgroundColor": "white",
+                        "borderRadius": 8
+                      },
+                      "object": "block"
+                    },
+                    {
+                        "id": "stripe",
+                        "type": "StripeElements@v1",
+                        "style": {
+                          "border": "1px solid #2394DF",
+                          "padding": 16,
+                          "backgroundColor": "white",
+                          "borderRadius": 8
+                        },
+                        "object": "block"
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "provides": [
+            "success"
+        ],
+        "layout": {
+          "sm": "split-checkout@v1"
+        },
+        "view": {
+          "promo": {
+            "style": {
+              "backgroundSize": "cover",
+              "backgroundImage": "url(happy-saruman.jpg)",
+              "backgroundRepeat": "no-repeat",
+              "backgroundPosition": "center"
+            },
+            "blocks": []
+          },
+          "action": {
+            "style": {
+              "padding": "1rem"
+            },
+            "blocks": [
+              {
+                "id": "action-block",
+                "text": [
+                  {
+                    "href": null,
+                    "props": {
+                      "link": null,
+                      "content": "Chat with the Orb"
+                    },
+                    "object": "text",
+                    "plain_text": "",
+                    "annotations": {
+                      "bold": true
+                    }
+                  }
+                ],
+                "type": "button",
+                "props": {
+                  "type": "submit"
+                },
+                "object": "action"
+              }
+            ]
+          },
+          "content": {
+            "blocks": [
+              {
+                "id": "h3",
+                "text": [
+                  {
+                    "href": null,
+                    "props": {
+                      "link": null,
+                      "content": "CONGRATULATIONS, UPGRADE SUCCESSFUL"
+                    },
+                    "object": "text",
+                    "plain_text": "",
+                    "annotations": {
+                      "bold": true
+                    }
+                  }
+                ],
+                "type": "h3",
+                "props": [],
+                "style": {
+                  "color": "#ABAAAA",
+                  "text-transform": "uppercase"
+                },
+                "object": "block"
+              },
+              {
+                "id": "h4",
+                "text": [
+                  {
+                    "href": null,
+                    "props": {
+                      "link": null,
+                      "content": "Welcome to your new unlimited plan!"
+                    },
+                    "object": "text",
+                    "plain_text": "",
+                    "annotations": {
+                      "bold": true
+                    }
+                  }
+                ],
+                "type": "h1",
+                "props": [],
+                "object": "block"
+              },
+              {
+                "id": "123p",
+                "text": [
+                  {
+                    "href": null,
+                    "props": {
+                      "link": null,
+                      "content": "You’ve just given your empire a massive competitive edge"
+                    },
+                    "style": {
+                      "backgroundColor": "white"
+                    },
+                    "object": "text",
+                    "plain_text": "",
+                    "annotations": {
+                      "bold": false
+                    }
+                  }
+                ],
+                "type": "p",
+                "props": [],
+                "object": "block"
+              },
+              {
+                "type": "dl",
+                "props": {
+                  "defaultIcon": ""
+                },
+                "style": {
+                },
+                "object": "block",
+                "children": [
+                  {
+                    "id": "123dt",
+                    "text": [
+                      {
+                        "href": null,
+                        "props": {
+                          "link": null,
+                          "content": "Instant communication to other Palantir holders"
+                        },
+                        "object": "text",
+                        "plain_text": "",
+                        "annotations": []
+                      }
+                    ],
+                    "type": "dt",
+                    "props": {
+                      "icon": "check",
+                      "width": "6",
+                      "variant": "solid"
+                    },
+                    "object": "block"
+                  },
+                  {
+                    "id": "123dd",
+                    "text": [
+                      {
+                        "href": null,
+                        "props": {
+                          "link": null,
+                          "content": "See into places far off, or events in the past"
+                        },
+                        "object": "text",
+                        "plain_text": "",
+                        "annotations": {
+                          "bold": false
+                        }
+                      }
+                    ],
+                    "type": "dd",
+                    "props": {
+                      "icon": "check",
+                      "width": "6",
+                      "variant": "solid"
+                    },
+                    "object": "block"
+                  },
+                  {
+                    "id": "123dd",
+                    "text": [
+                      {
+                        "href": null,
+                        "props": {
+                          "link": null,
+                          "content": "Hotline to the Dark Lord"
+                        },
+                        "object": "text",
+                        "plain_text": "",
+                        "annotations": {
+                          "bold": false
+                        }
+                      }
+                    ],
+                    "type": "dd",
+                    "props": {
+                      "icon": "check",
+                      "width": "6",
+                      "variant": "solid"
+                    },
+                    "object": "block"
+                  },
+                  {
+                    "id": "123dd",
+                    "text": [
+                      {
+                        "href": null,
+                        "props": {
+                          "link": null,
+                          "content": "Route to power and dominion over Middle-earth"
+                        },
+                        "object": "text",
+                        "plain_text": "",
+                        "annotations": {
+                          "bold": false
+                        }
+                      }
+                    ],
+                    "type": "dd",
+                    "props": {
+                      "icon": "check",
+                      "width": "6",
+                      "variant": "solid"
+                    },
+                    "object": "block"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+    }
+]

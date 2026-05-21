@@ -1,0 +1,53 @@
+name: SplitCheckout@v1
+template:
+  type: grid
+  props:
+    columns: 2
+    height: screen
+  children:
+    - type: box
+      style:
+        overflow: hidden
+      children:
+        - type: flex
+          props:
+            direction: column
+            justify: center
+            height: full
+          children:
+            - type: flex
+              props:
+                className: "space-y-6 overflow-y-auto"
+                direction: column
+                grow: true
+                wrap: nowrap
+                px: 10
+                py: 8
+              style:
+                overflowY: auto
+              children:
+                - id: title
+                  type: NavigationBar
+                  props:
+                    gap: 1
+                    px: 6
+                    barStyle: default
+                - id: content
+                  type: flex
+                  props:
+                    grow: true
+                    direction: column
+                    className: "space-y-2"
+
+            - id: action
+              type: flex
+              props:
+                direction: column
+                p: 6
+                gap: 2
+
+    - id: promo
+      type: box
+      style:
+        overflowY: auto
+        height: full
