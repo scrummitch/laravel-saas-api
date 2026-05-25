@@ -55,8 +55,32 @@ class ClientAuthorization
     {
         $request = request();
 
+        // Two valid call shapes:
+        //   1. JWT bearer token — verifies signature, kid comes from token only,
+        //      populates agent/customer/association context.
+        //   2. No JWT, just `?client=<id>` (or body) — public SDK telemetry
+        //      flow. Client ids are public (visible in any browser bundle), so
+        //      identifying the client without auth is fine; nothing
+        //      destructive runs on this path.
         if (empty($jwtString)) {
-            throw new Exception('Missing client token');
+            $this->client = Client::retrieve($request->input('client'));
+            $this->client?->loadMissing(['organization', 'billingProvider']);
+
+            if (! $this->client) {
+                throw new Exception('Invalid client id');
+            }
+
+            // The SDK sends ?collector=<uuid> alongside ?client=<id>; load
+            // it here so the no-JWT telemetry path can associate events
+            // with the originating browser session.
+            if ($request->filled('collector')) {
+                $this->collector = Collector::query()
+                    ->where('client_id', $this->client->id)
+                    ->where('uuid', $request->input('collector'))
+                    ->first();
+            }
+
+            return;
         }
 
         $parsed = self::parseJwtString($jwtString);
@@ -70,6 +94,9 @@ class ClientAuthorization
             throw new Exception('Unsupported token algorithm');
         }
 
+        // IMPORTANT: kid is read from the verified token header, never from
+        // `?client=<id>`. Letting the request override would allow a token
+        // signed by client A to be presented under client B's tenant context.
         $client = Client::retrieve($kid);
         $client?->loadMissing(['organization', 'billingProvider']);
 

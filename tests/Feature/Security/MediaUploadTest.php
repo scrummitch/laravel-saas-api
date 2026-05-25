@@ -43,7 +43,9 @@ class MediaUploadTest extends TestCase
     {
         Sanctum::actingAs($this->createUser());
 
-        $envBucket = $_ENV['MEDIA_FILESYSTEM_BUCKET'] ?? config('filesystems.disks.s3.bucket');
+        // Pin the operator-controlled bucket to a distinct value so we can
+        // assert the request-supplied one isn't smuggled through.
+        config()->set('filesystems.disks.s3.bucket', 'operator-controlled-bucket');
 
         $response = $this->postJson('/v1/media/assets', [
             'original_name' => 'logo.png',
@@ -52,8 +54,8 @@ class MediaUploadTest extends TestCase
             'bucket' => 'attacker-controlled-bucket',
         ])->assertStatus(201);
 
-        $this->assertSame($envBucket, $response->json('bucket'),
-            'asset must persist with the env bucket, not the request-supplied one');
+        $this->assertSame('operator-controlled-bucket', $response->json('bucket'),
+            'asset must persist with the operator-configured bucket, not the request body');
         $this->assertNotSame('attacker-controlled-bucket', $response->json('bucket'));
     }
 

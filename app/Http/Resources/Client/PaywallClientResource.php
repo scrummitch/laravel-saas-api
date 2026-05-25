@@ -28,8 +28,8 @@ class PaywallClientResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $stages = $this->when(env('CUSTOM_STAGES'), function () {
-            return json_decode(Storage::get(env('CUSTOM_STAGES')), true);
+        $stages = $this->when(config('app.custom_stages'), function () {
+            return json_decode(Storage::get(config('app.custom_stages')), true);
         }, $this->element?->view);
 
         $layouts = collect($stages)

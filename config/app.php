@@ -21,6 +21,7 @@ return [
 
     'demo_organization' => env('DEMO_ORGANIZATION'),
     'heartbeat_url' => env('HEARTBEAT_URL'),
+    'custom_stages' => env('CUSTOM_STAGES'),
 
     /*
     |--------------------------------------------------------------------------

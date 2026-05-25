@@ -44,6 +44,7 @@ class Scenario extends Model
         'element_id',
         'lookup_key',
         'name',
+        'display_name',
         'intent',
         'conditions',
         'properties',

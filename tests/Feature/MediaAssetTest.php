@@ -98,10 +98,12 @@ class MediaAssetTest extends TestCase
         $file = UploadedFile::fake()->image('avatar.jpg');
         $file->sizeToReport = 1024 * 1024 * 2;
 
-        $_ENV['AWS_ACCESS_KEY_ID'] = 'a';
-        $_ENV['AWS_SECRET_ACCESS_KEY'] = 'b';
-        $_ENV['AWS_SESSION_TOKEN'] = 'c';
-        $_ENV['AWS_URL'] = config('app.url');
+        // env() is boot-time-only in laravel 11 — push into the config repo
+        // directly so the runtime read picks up the fakes.
+        config()->set('filesystems.disks.s3.key', 'a');
+        config()->set('filesystems.disks.s3.secret', 'b');
+        config()->set('filesystems.disks.s3.token', 'c');
+        config()->set('filesystems.disks.s3.url', config('app.url'));
 
         $upload = [
             'original_name' => 'company_logo.png',

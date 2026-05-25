@@ -44,7 +44,7 @@ class StoreAssetControllerAction extends Controller
         $asset->original_name = $filename;
         // Never trust a client-supplied bucket — they could route uploads or
         // reads through someone else's bucket.
-        $asset->bucket = $_ENV['MEDIA_FILESYSTEM_BUCKET'] ?? null;
+        $asset->bucket = config('filesystems.disks.s3.bucket');
         $asset->content_type = $request->input('content_type') ?: 'application/octet-stream';
         $asset->size = $request->input('file_size');
         $asset->visibility = $request->input('visibility') ?: $this->defaultVisibility();
@@ -96,32 +96,50 @@ class StoreAssetControllerAction extends Controller
 
     public static function storageClient(): S3Client
     {
-        $config = [
-            'region' => config('filesystems.disks.s3.region', $_ENV['AWS_DEFAULT_REGION']),
+        $disk = config('filesystems.disks.s3', []);
+
+        $clientConfig = [
+            'region' => $disk['region'] ?? null,
             'version' => 'latest',
             'signature_version' => 'v4',
-            'use_path_style_endpoint' => config('filesystems.disks.s3.use_path_style_endpoint', false),
+            'use_path_style_endpoint' => $disk['use_path_style_endpoint'] ?? false,
         ];
 
-        if (! isset($_ENV['AWS_LAMBDA_FUNCTION_VERSION'])) {
-            $config['credentials'] = array_filter([
-                'key' => $_ENV['AWS_ACCESS_KEY_ID'] ?? null,
-                'secret' => $_ENV['AWS_SECRET_ACCESS_KEY'] ?? null,
-                'token' => $_ENV['AWS_SESSION_TOKEN'] ?? null,
+        // On Lambda / ECS the SDK's default credential chain picks up runtime
+        // creds; outside that we expect static creds in the disk config (which
+        // populates from env at boot). Avoid env() at runtime — Laravel pins
+        // it to boot-time values.
+        if (! self::isLambdaRuntime()) {
+            $credentials = array_filter([
+                'key' => $disk['key'] ?? null,
+                'secret' => $disk['secret'] ?? null,
+                'token' => $disk['token'] ?? null,
             ]);
 
-            if (array_key_exists('AWS_URL', $_ENV) && ! is_null($_ENV['AWS_URL'])) {
-                $config['url'] = $_ENV['AWS_URL'];
-                $config['endpoint'] = $_ENV['AWS_URL'];
+            // SDK rejects an empty credentials array — pass only when present,
+            // otherwise let the SDK use its default credential chain.
+            if ($credentials !== []) {
+                $clientConfig['credentials'] = $credentials;
+            }
+
+            if (! empty($disk['url'])) {
+                $clientConfig['url'] = $disk['url'];
+                $clientConfig['endpoint'] = $disk['url'];
             }
         }
 
-        // config from metadata api
-        if (isset($_ENV['AWS_CONTAINER_CREDENTIALS_RELATIVE_URI'])) {
-            $config['credentials'] = CredentialProvider::defaultProvider();
+        if (getenv('AWS_CONTAINER_CREDENTIALS_RELATIVE_URI') !== false) {
+            $clientConfig['credentials'] = CredentialProvider::defaultProvider();
         }
 
-        return new S3Client($config);
+        return new S3Client($clientConfig);
+    }
+
+    private static function isLambdaRuntime(): bool
+    {
+        // Lambda sets this env var when invoking the function; getenv() reads
+        // the live process environment rather than Laravel's frozen env cache.
+        return getenv('AWS_LAMBDA_FUNCTION_VERSION') !== false;
     }
 
     private function defaultVisibility(): string
@@ -146,7 +164,7 @@ class StoreAssetControllerAction extends Controller
     {
         $client = $this->storageClient();
 
-        $bucket = $_ENV['MEDIA_FILESYSTEM_BUCKET'] ?? null;
+        $bucket = config('filesystems.disks.s3.bucket');
         $expiresAfter = 5;
 
         return $client->createPresignedRequest(

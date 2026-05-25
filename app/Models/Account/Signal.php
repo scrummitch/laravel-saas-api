@@ -44,6 +44,9 @@ class Signal extends Model
         'currency',
         'metadata',
         'effective_at',
+        // Signal disables Eloquent timestamps, so created_at must be
+        // explicitly set by the caller (typically the observer).
+        'created_at',
     ];
 
     protected $casts = [

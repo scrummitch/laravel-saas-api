@@ -42,6 +42,10 @@ class Collector extends Model
         'country',
         'origin',
         'browser',
+        'os',
+        // Collector disables Eloquent's UPDATED_AT, so created_at is set
+        // explicitly by the session bootstrap action.
+        'created_at',
     ];
 
     const UPDATED_AT = null;
