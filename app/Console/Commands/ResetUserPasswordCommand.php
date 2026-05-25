@@ -19,7 +19,7 @@ class ResetUserPasswordCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Set a new password for a user, by email.';
 
     /**
      * Execute the console command.
@@ -39,8 +39,13 @@ class ResetUserPasswordCommand extends Command
         }
 
         $password = $this->secret('What is the new password?');
+        $confirm = $this->secret('Confirm the new password');
 
-        $this->info("The password is: $password");
+        if ($password !== $confirm) {
+            $this->error('Passwords did not match.');
+
+            return self::FAILURE;
+        }
 
         $user->password = bcrypt($password);
         $user->save();
