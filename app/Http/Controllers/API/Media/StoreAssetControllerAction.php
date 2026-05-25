@@ -42,7 +42,9 @@ class StoreAssetControllerAction extends Controller
         $asset->key = $key;
         $asset->name = $asset->sanitizeFilename($filename);
         $asset->original_name = $filename;
-        $asset->bucket = $request->input('bucket') ?: $_ENV['MEDIA_FILESYSTEM_BUCKET'];
+        // Never trust a client-supplied bucket — they could route uploads or
+        // reads through someone else's bucket.
+        $asset->bucket = $_ENV['MEDIA_FILESYSTEM_BUCKET'] ?? null;
         $asset->content_type = $request->input('content_type') ?: 'application/octet-stream';
         $asset->size = $request->input('file_size');
         $asset->visibility = $request->input('visibility') ?: $this->defaultVisibility();
@@ -144,7 +146,7 @@ class StoreAssetControllerAction extends Controller
     {
         $client = $this->storageClient();
 
-        $bucket = $request->input('bucket') ?: $_ENV['MEDIA_FILESYSTEM_BUCKET'];
+        $bucket = $_ENV['MEDIA_FILESYSTEM_BUCKET'] ?? null;
         $expiresAfter = 5;
 
         return $client->createPresignedRequest(
