@@ -130,6 +130,64 @@ class Client extends Model implements Authenticatable
         return '('.$this->pending_origins?->implode(', ').')';
     }
 
+    /**
+     * Allowed origins for a single client, cached per ULID.
+     *
+     * Preflight CORS requests don't carry the JWT, but the SDK always
+     * passes `?client=<ulid>` so we can still scope the trust check
+     * to just that client — no bulk load.
+     *
+     * Short TTL accepts a minute of staleness after an admin edit;
+     * the model events below also bust the entry on save/delete.
+     */
+    private const ORIGINS_CACHE_TTL = 60;
+
+    public static function allowedOriginsFor(?string $kid): array
+    {
+        if ($kid === null || $kid === '') {
+            return [];
+        }
+
+        // The SDK passes the public route key (e.g. `client_1CbPRy…`) which is
+        // a model-prefixed base58 encoding of the raw ulid. Normalise to the
+        // raw ulid column value before looking up — otherwise the where()
+        // never matches anything and CORS silently denies every request.
+        $ulid = self::getId($kid);
+
+        return Cache::remember(
+            self::originsCacheKey($ulid),
+            self::ORIGINS_CACHE_TTL,
+            fn () => self::query()
+                ->where('ulid', $ulid)
+                ->value('allowed_origins')
+                ?->filter()
+                ->values()
+                ->all() ?? [],
+        );
+    }
+
+    private static function originsCacheKey(string $ulid): string
+    {
+        return "clients:{$ulid}:allowed_origins";
+    }
+
+    protected static function booted(): void
+    {
+        $forget = function (Client $client) {
+            if ($client->ulid) {
+                Cache::forget(self::originsCacheKey($client->ulid));
+            }
+        };
+
+        static::saved(function (Client $client) use ($forget) {
+            if ($client->wasChanged('allowed_origins')) {
+                $forget($client);
+            }
+        });
+
+        static::deleted($forget);
+    }
+
     public function createToken(string $name, array $abilities = ['*'], DateTimeInterface $expiresAt = null)
     {
         $plainTextToken = $this->generateTokenString();

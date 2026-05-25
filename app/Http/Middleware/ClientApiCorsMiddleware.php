@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Client;
 use App\Models\Intelligence\Scenario;
 use Closure;
 use Fruitcake\Cors\CorsService;
@@ -83,10 +84,13 @@ class ClientApiCorsMiddleware
             return $next($request);
         }
 
+        $origin = (string) $request->headers->get('Origin');
+        $allowedOrigins = $this->resolveAllowedOriginsForClientApi($request, $origin);
+
         $this->cors->setOptions([
             'paths' => ['*'],
             'allowed_methods' => ['*'],
-            'allowed_origins' => ['*'],
+            'allowed_origins' => $allowedOrigins,
             'allowed_origins_patterns' => [],
             'allowed_headers' => [
                 'X-Requested-With',
@@ -126,6 +130,43 @@ class ClientApiCorsMiddleware
         }
 
         return $this->cors->addActualRequestHeaders($response, $request);
+    }
+
+    /**
+     * Resolve the allowed origins for a request hitting the generic /client/* API.
+     *
+     * Returns an allow-list — never `*`. The request origin must match either:
+     *   - the global trusted-origin list in `config/cors.php` (operator-managed), or
+     *   - the `allowed_origins` of the specific client identified by `?client=<ulid>`.
+     *
+     * The SDK always passes `?client=<ulid>` on every request (including the
+     * CORS preflight OPTIONS, since the param lives in the URL not a header),
+     * so we can scope the trust check to exactly one client — no bulk load.
+     *
+     * If the origin matches we echo it back as the sole allowed origin.
+     * Otherwise we return an empty list and the browser refuses the response.
+     */
+    protected function resolveAllowedOriginsForClientApi(Request $request, string $origin): array
+    {
+        if ($origin === '') {
+            return [];
+        }
+
+        if (in_array($origin, array_filter(config('cors.allowed_origins') ?? []), true)) {
+            return [$origin];
+        }
+
+        $kid = $request->query('client');
+
+        if (! is_string($kid) || $kid === '') {
+            return [];
+        }
+
+        if (in_array($origin, Client::allowedOriginsFor($kid), true)) {
+            return [$origin];
+        }
+
+        return [];
     }
 
     /**
