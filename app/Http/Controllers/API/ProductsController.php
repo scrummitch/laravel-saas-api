@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Concerns\ResolvesPerPage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
@@ -12,6 +13,13 @@ use Illuminate\Http\Request;
 
 class ProductsController extends Controller
 {
+    use ResolvesPerPage;
+
+    public function __construct()
+    {
+        $this->authorizeResource(Product::class, 'product');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -24,9 +32,7 @@ class ProductsController extends Controller
             ->products()
             ->with(['twins', 'twins.connector', 'features', 'productFamily']);
 
-        $limit = $request->integer('per_page', 250);
-
-        return ProductApiResource::collection($query->paginate($limit));
+        return ProductApiResource::collection($query->paginate($this->perPage($request)));
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Concerns\ResolvesPerPage;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\PlanApiResource;
 use App\Http\Resources\Api\SchemeApiResource;
@@ -12,14 +13,16 @@ use Illuminate\Support\Facades\DB;
 
 class SchemePlansController extends Controller
 {
-    public function index(Scheme $scheme)
+    use ResolvesPerPage;
+
+    public function index(Scheme $scheme, Request $request)
     {
         $query = $scheme
             ->plans()
             ->with(['charges', 'charges.product', 'package'])
             ->withCount('schedules')
             ->latest()
-            ->paginate(999);
+            ->paginate($this->perPage($request));
 
         return PlanApiResource::collection($query);
     }

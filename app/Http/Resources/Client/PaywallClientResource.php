@@ -11,6 +11,17 @@ use Symfony\Component\Yaml\Yaml;
 class PaywallClientResource extends JsonResource
 {
     /**
+     * Paywall layout identifiers that are allowed to be parsed from disk.
+     * `$layout` flows from stored element data which an org admin can craft,
+     * so without this filter `layout: "../../foo"` would let them read
+     * arbitrary `.yml` files under the project root when an end-user
+     * requests their paywall.
+     */
+    private const ALLOWED_LAYOUTS = [
+        'split-checkout@v1',
+    ];
+
+    /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
@@ -29,6 +40,7 @@ class PaywallClientResource extends JsonResource
                 'split-checkout@v1',
             ])
             ->unique()
+            ->filter(fn ($layout) => is_string($layout) && in_array($layout, self::ALLOWED_LAYOUTS, true))
             ->mapWithKeys(function ($layout) {
                 return [$layout => Yaml::parseFile(resource_path('paywall-templates/'.$layout.'.yml'))];
             });

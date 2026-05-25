@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Database\DeviceDetectorCache;
+use App\Http\Concerns\ResolvesPerPage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreWorkflowRequest;
 use App\Http\Requests\UpdateWorkflowRequest;
@@ -33,11 +34,15 @@ use Illuminate\Support\Str;
 
 class FlowsController extends Controller
 {
+    use ResolvesPerPage;
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $this->authorize('viewAny', Flow::class);
+
         $org = auth()->user()->currentOrganization;
 
         $query = $org
@@ -62,7 +67,7 @@ class FlowsController extends Controller
             return collect($now);
         });
 
-        $workflows = $query->paginate(999);
+        $workflows = $query->paginate($this->perPage($request));
         $workflowStats = collect($stats->getGlobalStats());
 
         $workflows->each(function ($workflow) use ($workflowStats) {
@@ -79,6 +84,8 @@ class FlowsController extends Controller
      */
     public function store(StoreWorkflowRequest $request)
     {
+        $this->authorize('create', Flow::class);
+
         $validated = $request->validated();
         $workflow = new Flow;
 
@@ -108,6 +115,8 @@ class FlowsController extends Controller
      */
     public function show(Flow $flow)
     {
+        $this->authorize('view', $flow);
+
         $flow
             ->loadMissing([
                 'scenarios', 'images', 'scenarios.bundleItems', 'scenarios.bundleItems.purchasable'
@@ -121,6 +130,8 @@ class FlowsController extends Controller
      */
     public function update(UpdateWorkflowRequest $request, Flow $flow)
     {
+        $this->authorize('update', $flow);
+
         $validated = $request->validated();
 
         $flow->name = Arr::get($validated, 'name');
@@ -167,6 +178,8 @@ class FlowsController extends Controller
      */
     public function destroy(Flow $flow)
     {
+        $this->authorize('delete', $flow);
+
         $flow->delete();
 
         return response()->noContent();
@@ -174,6 +187,8 @@ class FlowsController extends Controller
 
     public function resultsIndex(Flow $flow, Request $request)
     {
+        $this->authorize('view', $flow);
+
         $org = $request->user()->currentOrganization;
         $client = Client::retrieve($request->get('client')) ?? $org->liveClient();
 
@@ -195,6 +210,8 @@ class FlowsController extends Controller
 
     public function storeSandboxAgent(Flow $flow, Request $request)
     {
+        $this->authorize('update', $flow);
+
         $benchmarks = [];
         $startTime = microtime(true);
 
@@ -262,6 +279,8 @@ class FlowsController extends Controller
 
     public function conversionsIndex(Flow $flow)
     {
+        $this->authorize('view', $flow);
+
         $flow->loadMissing(['scenarios']);
 
         $query = Activity::query()
@@ -333,6 +352,8 @@ class FlowsController extends Controller
 
     public function eventsIndex(Flow $flow)
     {
+        $this->authorize('view', $flow);
+
         $events = ActivityAction::query()
             ->with(['activity'])
             ->whereHas('activity', function ($query) use ($flow) {
@@ -361,6 +382,8 @@ class FlowsController extends Controller
 
     public function sessionsIndex(Flow $flow)
     {
+        $this->authorize('view', $flow);
+
         $query = $flow
             ->activities()
             ->latest('id')
