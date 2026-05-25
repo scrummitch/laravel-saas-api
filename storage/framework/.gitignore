@@ -1,9 +1,8 @@
-compiled.php
-config.php
-down
-events.scanned.php
-maintenance.php
-routes.php
-routes.scanned.php
-schedule-*
-services.json
+sessions/*
+!sessions/.gitkeep
+views/*
+!views/.gitkeep
+cache/*
+!cache/.gitkeep
+testing/*
+!testing/.gitkeep
