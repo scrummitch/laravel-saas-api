@@ -14,6 +14,11 @@ use Illuminate\Http\Request;
 
 class SchemesController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Scheme::class, 'scheme');
+    }
+
     /**
      * Display a listing of the resource.
      */

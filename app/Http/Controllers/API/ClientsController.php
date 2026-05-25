@@ -13,6 +13,11 @@ use Illuminate\Support\Arr;
 
 class ClientsController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Client::class, 'client');
+    }
+
     /**
      * Display a listing of the resource.
      */

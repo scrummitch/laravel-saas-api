@@ -9,6 +9,8 @@ class CreateOperationAttemptController extends Controller
 {
     public function __invoke(Operation $operation)
     {
+        $this->authorize('update', $operation);
+
         $operation->retry();
 
         return $operation;

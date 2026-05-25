@@ -10,6 +10,11 @@ use Illuminate\Validation\Rule;
 
 class BillingProvidersController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(BillingProvider::class, 'provider');
+    }
+
     public function index(Request $request)
     {
         $billingProvidersQuery = $request
@@ -30,6 +35,8 @@ class BillingProvidersController extends Controller
 
     public function storeOperation(BillingProvider $provider, Request $request)
     {
+        $this->authorize('update', $provider);
+
         $validated = $request->validate([
             'type' => [
                 'required',

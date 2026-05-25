@@ -15,6 +15,11 @@ use Illuminate\Support\Arr;
 
 class ElementsController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Element::class, 'element');
+    }
+
     /**
      * Display a listing of the resource.
      */

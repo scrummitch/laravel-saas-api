@@ -4,7 +4,7 @@ namespace App\Policies;
 
 use App\Policies\Concerns\TenantScoped;
 
-class PlanPolicy
+class BillingProviderPolicy
 {
     use TenantScoped;
 }
