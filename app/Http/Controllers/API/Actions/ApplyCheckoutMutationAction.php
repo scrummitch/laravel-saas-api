@@ -20,6 +20,11 @@ class ApplyCheckoutMutationAction extends Controller
 
     public function __invoke(ClientAuthorization $auth, Purchase $purchase, Request $request)
     {
+        abort_unless(
+            (int) $purchase->organization_id === (int) $auth->client?->organization_id,
+            404,
+        );
+
         $action = $request->get('action');
 
         $this->client = $auth->client;

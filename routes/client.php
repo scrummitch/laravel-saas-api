@@ -4,12 +4,12 @@ use App\Http\Controllers\API\Actions\ApplyCheckoutMutationAction;
 use App\Http\Controllers\API\Actions\UpdateClientCheckoutAction;
 use App\Http\Controllers\Client\CreateUsageEventController;
 use App\Http\Controllers\Client\GetClientSessionAction;
+use App\Http\Controllers\Client\ShowClientCheckoutController;
 use App\Http\Controllers\Client\StoreClientEventAction;
 use App\Http\Controllers\Client\StoreClientPaywallEventsAction;
 use App\Http\Controllers\Client\StoreSetupIntentAction;
 use App\Http\Controllers\Client\StoreTransactionAction;
 use App\Http\Controllers\Clients\ClientPaywallController;
-use App\Http\Resources\Client\CheckoutClientResource;
 use Illuminate\Support\Facades\Route;
 
 // start an SDK session
@@ -29,15 +29,10 @@ Route::post('/usage/events', CreateUsageEventController::class)->name('usage.eve
 
 // elements/{id} view for element
 
-Route::group([
-    'prefix' => '/checkouts',
-    'as' => 'checkouts.',
-], function () {
-    Route::get('/{purchase}', function (\App\Models\Store\Purchase $purchase) {
-        return new CheckoutClientResource($purchase);
-    });
-    Route::patch('/{purchase}', UpdateClientCheckoutAction::class);
-    Route::post('/{purchase}/mutations', ApplyCheckoutMutationAction::class);
+Route::prefix('/checkouts')->name('checkouts.')->group(function () {
+    Route::get('/{purchase}', ShowClientCheckoutController::class)->name('show');
+    Route::patch('/{purchase}', UpdateClientCheckoutAction::class)->name('update');
+    Route::post('/{purchase}/mutations', ApplyCheckoutMutationAction::class)->name('mutations.store');
 });
 
 /* @deprecated  */
