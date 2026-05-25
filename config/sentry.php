@@ -3,7 +3,8 @@
 use Illuminate\Support\Arr;
 use Symfony\Component\Yaml\Yaml;
 
-$config = attempt(fn () => Yaml::parseFile(storage_path('version.yaml')));
+$versionFile = storage_path('version.yaml');
+$config = file_exists($versionFile) ? Yaml::parseFile($versionFile) : null;
 
 /**
  * Sentry Laravel SDK configuration file.

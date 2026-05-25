@@ -78,22 +78,17 @@ class DBSCAN
         $neighbor_points = [];
 
         foreach ($this->points as $point2) {
-            if ($point != $point2) {
-                // Because we are using an upper diagonal representation of distances between points
-                try {
-                    if (array_key_exists($point2, $this->distance_matrix[$point])) {
-                        $distance = $this->distance_matrix[$point][$point2];
-                    } else {
-                        $distance = $this->distance_matrix[$point2][$point];
-                    }
-                } catch (\Throwable $e) {
-                    dd($e, $point2, $this->distance_matrix, $point);
-                }
+            if ($point === $point2) {
+                continue;
+            }
 
-                if ($distance < $epsilon) {
-                    $neighbor_points[] = $point2;
-                }
+            // Upper-diagonal distance matrix: only one direction is populated.
+            $distance = $this->distance_matrix[$point][$point2]
+                ?? $this->distance_matrix[$point2][$point]
+                ?? null;
 
+            if ($distance !== null && $distance < $epsilon) {
+                $neighbor_points[] = $point2;
             }
         }
 

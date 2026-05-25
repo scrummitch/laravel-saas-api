@@ -21,10 +21,3 @@ function logname(...$arguments): string
     return trim($callerName.'@'.$callerFn.Str::start(implode('.', Arr::flatten($arguments)), '.'), '.\\,@');
 }
 
-function attempt(Closure $closure) {
-    try {
-        return $closure();
-    } catch (\Throwable $e) {
-        return null;
-    }
-}
