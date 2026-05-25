@@ -33,7 +33,16 @@ class Collector extends Model
 
     protected $table = 'stats_collectors';
 
-    protected $guarded = [];
+    protected $fillable = [
+        'uuid',
+        'ulid',
+        'client_id',
+        'agent_id',
+        'anonymous_id',
+        'country',
+        'origin',
+        'browser',
+    ];
 
     const UPDATED_AT = null;
 

@@ -33,7 +33,16 @@ class Twin extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'organization_id',
+        'connection_id',
+        'connector_id',
+        'connector_type',
+        'type',
+        'reference_id',
+        'data',
+        'reference_created_at',
+    ];
 
     protected $hidden = [
         'connector',

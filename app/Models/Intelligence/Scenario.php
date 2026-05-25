@@ -37,9 +37,22 @@ class Scenario extends Model
 
     protected $table = 'intel_scenarios';
 
-    public $guarded = [];
+    protected $fillable = [
+        'organization_id',
+        'flow_id',
+        'scheme_id',
+        'element_id',
+        'lookup_key',
+        'name',
+        'intent',
+        'conditions',
+        'properties',
+        'bundle_rules',
+        'renew_interval',
+        'current_state',
+    ];
 
-    public $casts = [
+    protected $casts = [
         'properties' => 'json',
         'conditions' => 'array',
         'bundle_rules' => 'array',

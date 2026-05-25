@@ -43,7 +43,21 @@ class Subscription extends Model
 
     protected $table = 'billing_subscriptions';
 
-    protected $guarded = [];
+    protected $fillable = [
+        'organization_id',
+        'customer_id',
+        'schedule_id',
+        'previous_subscription_id',
+        'plan_id',
+        'twin_id',
+        'quantity',
+        'current_state',
+        'start_at',
+        'end_at',
+        'cancel_at',
+        'invoiced_at',
+        'renewed_at',
+    ];
 
     protected $casts = [
         'start_at' => 'datetime',

@@ -23,7 +23,16 @@ class PurchaseItem extends Model
 {
     protected $table = 'store_purchase_items';
 
-    protected $guarded = [];
+    protected $fillable = [
+        'purchase_id',
+        'purchasable_type',
+        'purchasable_id',
+        'quantity',
+        'amount_discount',
+        'amount_total',
+        'amount_subtotal',
+        'amount_tax',
+    ];
 
     public function transaction(): BelongsTo
     {

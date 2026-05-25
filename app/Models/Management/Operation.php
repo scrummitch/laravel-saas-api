@@ -36,7 +36,20 @@ class Operation extends Model
         'failed_at' => 'datetime',
     ];
 
-    protected $guarded = [];
+    protected $fillable = [
+        'organization_id',
+        'model_id',
+        'model_type',
+        'batch_id',
+        'name',
+        'description',
+        'output',
+        'metadata',
+        'status',
+        'failed_at',
+        'finished_at',
+        'cancelled_at',
+    ];
 
     public function model(): MorphTo
     {

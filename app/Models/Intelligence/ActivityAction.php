@@ -25,7 +25,14 @@ class ActivityAction extends Model
 
     protected $table = 'intel_actions';
 
-    protected $guarded = [];
+    protected $fillable = [
+        'event_id',
+        'activity_id',
+        'type',
+        'event_name',
+        'properties',
+        'metadata',
+    ];
 
     protected $casts = [
         'type' => ActionType::class,
