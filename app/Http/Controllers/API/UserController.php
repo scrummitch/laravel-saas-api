@@ -29,8 +29,24 @@ class UserController extends Controller
         );
 
         if ($request->has('last_organization_id')) {
-            $user->last_organization_id = Organization::retrieve($request->last_organization_id)?->id;
-            logger()->debug('last_organization_id', ['last_organization_id' => $user->last_organization_id]);
+            $requestedOrgId = $request->input('last_organization_id');
+
+            // IMPORTANT: the inner where/orWhere MUST be grouped, otherwise SQL
+            // precedence (AND binds tighter than OR) breaks the membership scope:
+            //   WHERE pivot.user_id = me AND organizations.id = X OR organizations.ulid = X
+            //   == (membership AND id-match) OR ulid-match-any-org
+            $table = (new Organization)->getTable();
+
+            $org = $user->organizations()
+                ->where(function ($q) use ($table, $requestedOrgId) {
+                    $q->where("{$table}.id", $requestedOrgId)
+                        ->orWhere("{$table}.ulid", $requestedOrgId);
+                })
+                ->first();
+
+            abort_unless($org, 422, 'You are not a member of that organization.');
+
+            $user->last_organization_id = $org->id;
         }
 
         if ($user->isDirty('email')) {

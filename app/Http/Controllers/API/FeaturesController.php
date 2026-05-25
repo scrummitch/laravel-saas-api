@@ -13,6 +13,11 @@ use Illuminate\Support\Arr;
 
 class FeaturesController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Feature::class, 'feature');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -36,17 +41,20 @@ class FeaturesController extends Controller
         $validated = $request->validated();
 
         $feature = new Feature;
-        Feature::unguard();
         $feature->organization_id = auth()->user()->currentOrganization->id;
         $feature->fill(Arr::only($validated, ['lookup_key', 'name', 'released_at']));
         $feature->save();
 
-        if ($request->has('metric')) {
-            Metric::unguard();
+        if (isset($validated['metric'])) {
             $metric = new Metric;
             $metric->organization_id = auth()->user()->currentOrganization->id;
             $metric->feature_id = $feature->id;
-            $metric->fill($request->get('metric'));
+            $metric->fill(Arr::only($validated['metric'], [
+                'event_name',
+                'aggregation',
+                'type',
+                'field_name',
+            ]));
             $metric->save();
         }
 
