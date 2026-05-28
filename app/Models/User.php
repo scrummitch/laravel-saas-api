@@ -81,13 +81,19 @@ class User extends Authenticatable
 
     public function getOrganizationIdAttribute(): int
     {
-        if (! is_null($this->last_organization_id)) {
+        if (! is_null($this->last_organization_id)
+            && Organization::query()->whereKey($this->last_organization_id)->exists()) {
             return $this->last_organization_id;
         }
 
         $firstMembership = optional($this->memberships->first())->organization_id;
 
         if (! is_null($firstMembership)) {
+            if ($this->last_organization_id !== $firstMembership) {
+                $this->last_organization_id = $firstMembership;
+                $this->save();
+            }
+
             return $firstMembership;
         }
 
