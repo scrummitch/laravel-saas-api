@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Client;
 
+use App\Client\ClientAuthorization;
 use App\Http\Controllers\Controller;
 use App\Models\Account\Customer;
-use App\Models\Client;
 use App\Models\Usage\UsageEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -13,32 +13,26 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CreateUsageEventController extends Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(Request $request, ClientAuthorization $auth)
     {
-        $request
-            ->merge([
-                'client_id' => Client::retrieve($request->input('client_id'))?->id,
-            ])
-            ->validate([
-                'client_id' => [
-                    'required',
-                    Rule::exists(Client::class, 'id'),
-                ],
-                'customer_id' => [
-                    'required',
-                    Rule::exists(Customer::class, 'reference_id'),
-                ],
-                'event_name' => [
-                    'required',
-                    'string',
-                ],
-                'properties' => [
-                    'required',
-                    'array',
-                ],
-            ]);
+        $client = $auth->client;
 
-        $client = Client::retrieve($request->input('client_id'));
+        abort_unless($client, Response::HTTP_UNAUTHORIZED);
+
+        $request->validate([
+            'customer_id' => [
+                'required',
+                Rule::exists(Customer::class, 'reference_id'),
+            ],
+            'event_name' => [
+                'required',
+                'string',
+            ],
+            'properties' => [
+                'required',
+                'array',
+            ],
+        ]);
 
         $customer = Customer::query()
             ->where('reference_id', $request->input('customer_id'))
@@ -47,7 +41,7 @@ class CreateUsageEventController extends Controller
 
         $usageEvent = new UsageEvent;
         $usageEvent->organization_id = $client->organization_id;
-        $usageEvent->client_id = $client?->id;
+        $usageEvent->client_id = $client->id;
         $usageEvent->customer_id = $customer->id;
         $usageEvent->agent_id = null;
         $usageEvent->event_name = $request->input('event_name');
