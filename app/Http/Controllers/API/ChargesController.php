@@ -13,6 +13,11 @@ use Illuminate\Support\Arr;
 
 class ChargesController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Charge::class, 'charge');
+    }
+
     /**
      * Display a listing of the resource.
      */

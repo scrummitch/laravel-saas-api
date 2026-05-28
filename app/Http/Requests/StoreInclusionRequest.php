@@ -2,27 +2,36 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Billing\Charge;
+use App\Models\Catalog\Product;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreInclusionRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('update', $this->route('plan'));
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
+        $orgId = $this->user()->currentOrganization->id;
+
         return [
-            //
+            'product' => [
+                'nullable',
+                Rule::exists((new Product)->getTable(), (new Product)->getRouteKeyName())
+                    ->where('organization_id', $orgId),
+            ],
+            'charge' => [
+                'nullable',
+                Rule::exists((new Charge)->getTable(), (new Charge)->getRouteKeyName())
+                    ->where('organization_id', $orgId),
+            ],
         ];
     }
 }

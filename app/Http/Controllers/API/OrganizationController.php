@@ -43,11 +43,17 @@ class OrganizationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Organization $organization)
+    public function show(Request $request, Organization $organization)
     {
-        $resource = new OrganizationApiResource($organization);
+        abort_unless(
+            $request->user()->organizations()
+                ->wherePivot('organization_id', $organization->id)
+                ->exists(),
+            403,
+            'You do not have access to this organization.'
+        );
 
-        return $resource;
+        return new OrganizationApiResource($organization);
     }
 
     /**

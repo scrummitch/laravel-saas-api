@@ -197,12 +197,7 @@ class ResetDemoAccountJob extends QueueableJob
         }
 
         foreach ($insertions as $insertion) {
-            try {
-                DB::table('intel_activities')
-                    ->insert($insertion);
-            } catch (\Throwable $e) {
-                dd($e);
-            }
+            DB::table('intel_activities')->insert($insertion);
         }
     }
 }

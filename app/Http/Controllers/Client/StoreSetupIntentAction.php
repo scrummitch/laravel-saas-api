@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Stripe\Exception\ApiErrorException;
 
@@ -113,10 +114,22 @@ class StoreSetupIntentAction extends Controller
             ], Twin::fromStripeObject($pm)->toArray());
         Twin::reguard();
 
-        $pms = $customer->payment_methods ?? [];
-        array_push($pms, $pmTwin->id);
-        $customer->payment_methods = $pms;
-        $customer->save();
+        DB::transaction(function () use ($customer, $pmTwin) {
+            $locked = Customer::query()
+                ->whereKey($customer->id)
+                ->lockForUpdate()
+                ->first();
+
+            $pms = $locked->payment_methods ?? [];
+
+            if (! in_array($pmTwin->id, $pms, true)) {
+                $pms[] = $pmTwin->id;
+                $locked->payment_methods = $pms;
+                $locked->save();
+            }
+
+            $customer->payment_methods = $pms;
+        });
 
         return response([
             'payment_method' => $setupIntent->payment_method,

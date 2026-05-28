@@ -7,6 +7,7 @@ use App\Http\Middleware\ClientJwtMiddleware;
 use App\Http\Middleware\LogHookRequestMiddleware;
 use App\Http\Middleware\LogRequestMiddleware;
 use App\Http\Middleware\RespondWithJsonMiddleware;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Routing\Middleware\ThrottleRequests;
@@ -24,12 +25,13 @@ class Kernel extends HttpKernel
     protected $middleware = [
         ClientApiCorsMiddleware::class,
         \Illuminate\Http\Middleware\HandleCors::class,
-        //        \App\Http\Middleware\TrustHosts::class,
+        \App\Http\Middleware\TrustHosts::class,
         \App\Http\Middleware\TrustProxies::class,
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        SecurityHeaders::class,
     ];
 
     /**
@@ -62,7 +64,7 @@ class Kernel extends HttpKernel
             RespondWithJsonMiddleware::class,
             LogRequestMiddleware::class,
             EnsureFrontendRequestsAreStateful::class,
-//            ThrottleRequests::class.':api',
+            ThrottleRequests::class.':api',
             SubstituteBindings::class,
         ],
     ];

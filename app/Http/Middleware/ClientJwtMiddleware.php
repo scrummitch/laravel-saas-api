@@ -17,10 +17,6 @@ class ClientJwtMiddleware
 
             return $next($request);
         } catch (Exception $e) {
-            if (app()->runningUnitTests()) {
-                dd($e);
-            }
-
             logger()->error(logname(), [
                 'msg' => $e->getMessage(),
                 'class' => get_class($e),
@@ -29,8 +25,8 @@ class ClientJwtMiddleware
             ]);
 
             return response()->json([
-                'error' => $e->getMessage(),
-            ], 403);
+                'error' => 'Unauthorized',
+            ], 401);
         }
     }
 }

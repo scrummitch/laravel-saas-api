@@ -33,7 +33,21 @@ class Signal extends Model
 
     public $timestamps = false;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'organization_id',
+        'client_id',
+        'customer_id',
+        'activity_id',
+        'convert_activity_id',
+        'type',
+        'amount_raw',
+        'currency',
+        'metadata',
+        'effective_at',
+        // Signal disables Eloquent timestamps, so created_at must be
+        // explicitly set by the caller (typically the observer).
+        'created_at',
+    ];
 
     protected $casts = [
         'type' => SignalID::class,

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Billing\ISO4217;
+use App\Http\Concerns\ResolvesPerPage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePlanRequest;
 use App\Http\Requests\UpdatePlanRequest;
@@ -17,6 +18,13 @@ use Illuminate\Support\Arr;
 
 class PlansController extends Controller
 {
+    use ResolvesPerPage;
+
+    public function __construct()
+    {
+        $this->authorizeResource(Plan::class, 'plan');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -26,7 +34,7 @@ class PlansController extends Controller
         $org = auth()->user()->currentOrganization;
 
 
-        $perPage = $request->get('per_page', 200);
+        $perPage = $this->perPage($request);
 
         $plans = $org
             ->plans()

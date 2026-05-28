@@ -4,63 +4,51 @@ namespace App\Policies;
 
 use App\Models\Catalog\Inclusion;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class InclusionPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
     public function viewAny(User $user): bool
     {
-        //
+        return $user->currentOrganization !== null;
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, Inclusion $inclusion): bool
     {
-        return $user->currentOrganization->id === $inclusion->plan->organization_id;
+        return $this->sameOrganization($user, $inclusion);
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        //
+        return $user->currentOrganization !== null;
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, Inclusion $inclusion): bool
     {
-        return $this->view($user, $inclusion);
+        return $this->sameOrganization($user, $inclusion);
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, Inclusion $inclusion): bool
     {
-        //
+        return $this->sameOrganization($user, $inclusion);
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
     public function restore(User $user, Inclusion $inclusion): bool
     {
-        //
+        return $this->sameOrganization($user, $inclusion);
+    }
+
+    public function forceDelete(User $user, Inclusion $inclusion): bool
+    {
+        return false;
     }
 
     /**
-     * Determine whether the user can permanently delete the model.
+     * Inclusion has no own organization_id — it inherits via its parent plan.
      */
-    public function forceDelete(User $user, Inclusion $inclusion): bool
+    private function sameOrganization(User $user, Inclusion $inclusion): bool
     {
-        //
+        $org = $user->currentOrganization;
+
+        return $org !== null && (int) $org->id === (int) $inclusion->plan?->organization_id;
     }
 }

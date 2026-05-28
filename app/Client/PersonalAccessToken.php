@@ -83,9 +83,23 @@ class PersonalAccessToken extends \Laravel\Sanctum\PersonalAccessToken
             return null;
         }
 
-        [$prefix, $env, $encodedPart] = explode('_', $token);
+        $parts = explode('_', $token, 3);
+
+        if (count($parts) < 3 || $parts[2] === '') {
+            return null;
+        }
+
+        $encodedPart = $parts[2];
+
+        if (! preg_match('/^[1-9A-HJ-NP-Za-km-z]+$/', $encodedPart)) {
+            return null;
+        }
 
         $decodedBytes = BinaryUtil::fromBase($encodedPart, BinaryUtil::BASE58);
+
+        if (strlen($decodedBytes) < 16) {
+            return null;
+        }
 
         $apiKey = base64_encode(substr($decodedBytes, 16));
 

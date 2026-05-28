@@ -59,7 +59,24 @@ class Plan extends Model implements IsPurchasable
         'invoice_interval' => IntervalCast::class,
     ];
 
-    protected $guarded = []; //@todo set fillable fields
+    protected $fillable = [
+        'organization_id',
+        'package_id',
+        'type',
+        'status',
+        'active',
+        'lookup_key',
+        'name',
+        'display_name',
+        'description',
+        'currency',
+        'renew_interval',
+        'invoice_interval',
+        'billing_anchor',
+        'trial_length',
+        'trial_credit',
+        'trial_unit',
+    ];
 
     public function organization(): BelongsTo
     {

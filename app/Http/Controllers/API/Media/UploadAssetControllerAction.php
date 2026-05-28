@@ -16,7 +16,21 @@ class UploadAssetControllerAction extends Controller
         abort_if(config('filesystems.media') !== 'local', 400, 'The media filesystem is not local');
         abort_if(! $request->hasValidSignature(), 400);
 
-        Storage::put('public/'.$request->get('path'), $request->getContent());
+        $path = (string) $request->get('path');
+
+        // Defence in depth: the signed URL binds the path, but a bug in URL
+        // generation could otherwise let a write escape the assets/ subtree.
+        abort_unless(
+            $path !== ''
+                && ! str_contains($path, '..')
+                && ! str_contains($path, '\\')
+                && ! str_starts_with($path, '/')
+                && str_starts_with($path, 'assets/'),
+            400,
+            'Invalid upload path.',
+        );
+
+        Storage::put('public/'.$path, $request->getContent());
 
         return response('', 201);
     }

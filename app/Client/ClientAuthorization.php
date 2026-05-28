@@ -29,7 +29,9 @@ class ClientAuthorization
     public ?Collector $collector = null;
     public ?\stdClass $payload = null;
 
-    public static function parseJwtString($jwt)
+    private const ALLOWED_ALGS = ['HS256'];
+
+    public static function parseJwtString(string $jwt): ?array
     {
         $tks = \explode('.', $jwt);
 
@@ -37,50 +39,88 @@ class ClientAuthorization
             return null;
         }
 
-        [$headb64, $bodyb64, $cryptob64] = $tks;
+        [$headb64, , ] = $tks;
 
         $headerRaw = JWT::urlsafeB64Decode($headb64);
         $header = JWT::jsonDecode($headerRaw);
 
-        $kid = data_get($header, 'kid');
+        if (! $header || ! isset($header->kid)) {
+            return null;
+        }
 
-        return [$jwt, $kid, $header];
+        return [$jwt, $header->kid, $header];
     }
 
     public function __construct(?string $jwtString)
     {
         $request = request();
-        [$jwt, $kid, $header] = $this->parseJwtString($jwtString);
 
-        $client = Client::retrieve($request->input('client', $kid));
+        // Two valid call shapes:
+        //   1. JWT bearer token — verifies signature, kid comes from token only,
+        //      populates agent/customer/association context.
+        //   2. No JWT, just `?client=<id>` (or body) — public SDK telemetry
+        //      flow. Client ids are public (visible in any browser bundle), so
+        //      identifying the client without auth is fine; nothing
+        //      destructive runs on this path.
+        if (empty($jwtString)) {
+            $this->client = Client::retrieve($request->input('client'));
+            $this->client?->loadMissing(['organization', 'billingProvider']);
+
+            if (! $this->client) {
+                throw new Exception('Invalid client id');
+            }
+
+            // The SDK sends ?collector=<uuid> alongside ?client=<id>; load
+            // it here so the no-JWT telemetry path can associate events
+            // with the originating browser session.
+            if ($request->filled('collector')) {
+                $this->collector = Collector::query()
+                    ->where('client_id', $this->client->id)
+                    ->where('uuid', $request->input('collector'))
+                    ->first();
+            }
+
+            return;
+        }
+
+        $parsed = self::parseJwtString($jwtString);
+        if ($parsed === null) {
+            throw new Exception('Malformed client token');
+        }
+        [$jwt, $kid, $header] = $parsed;
+
+        $headerAlg = $header->alg ?? null;
+        if (! in_array($headerAlg, self::ALLOWED_ALGS, true)) {
+            throw new Exception('Unsupported token algorithm');
+        }
+
+        // IMPORTANT: kid is read from the verified token header, never from
+        // `?client=<id>`. Letting the request override would allow a token
+        // signed by client A to be presented under client B's tenant context.
+        $client = Client::retrieve($kid);
         $client?->loadMissing(['organization', 'billingProvider']);
 
         $this->client = $client;
 
         if (! $client) {
             logger()->error(logname('fail'), [
-                'message' => 'no kid provided',
-                'jwt' => $jwt,
+                'message' => 'unknown kid',
             ]);
 
             throw new Exception('Invalid client id');
         }
 
-        if ($request->filled('collector') && ! is_null($client)) {
+        if ($request->filled('collector')) {
             $this->collector = Collector::query()
-                ->where('client_id', $client?->id)
+                ->where('client_id', $client->id)
                 ->where('uuid', $request->input('collector'))
                 ->first();
         }
 
-        if (empty($jwt)) {
-            return;
-        }
-
         $organization = $client->organization;
 
+        $key = new Key($client->getSecretStr(), 'HS256');
         $headers = new \stdClass;
-        $key = new Key($client->getSecretStr(), data_get($header, 'alg', 'HS256'));
 
         $this->payload = $payload = JWT::decode($jwt, $key, $headers);
         $isSandbox = data_get($payload, 'aud') === 'sandbox';
@@ -98,12 +138,12 @@ class ClientAuthorization
 
 
         if (isset($payload->customer)) {
-            try {
-                $customer = Customer::query()
-                    ->with(['billingProvider'])
-                    ->where('reference_id', $payload->customer)
-                    ->first();
-            } catch (Exception $e) {
+            $customer = Customer::query()
+                ->with(['billingProvider'])
+                ->where('reference_id', $payload->customer)
+                ->first();
+
+            if (! $customer) {
                 $customer = $this->findOrCreateCustomer($client, $payload->customer, $organization, $isSandbox);
 
                 if (! $customer) {
@@ -227,18 +267,22 @@ class ClientAuthorization
             return null;
         }
 
-        [$c, $q] = explode('?', $token);
-
-        $query = Query::parse($q);
-        $s = $query['sig'];
-
-        $signature = hash_hmac('sha256', $c, config('app.key'));
-
-        if ($s !== $signature) {
+        if (! str_contains($token, '?')) {
             abort(401, 'Unauthorized');
         }
 
-        if (! hash_equals($s, $signature)) {
+        [$c, $q] = explode('?', $token, 2);
+
+        $query = Query::parse($q);
+        $provided = $query['sig'] ?? null;
+
+        if (! is_string($provided)) {
+            abort(401, 'Unauthorized');
+        }
+
+        $expected = hash_hmac('sha256', $c, config('app.key'));
+
+        if (! hash_equals($expected, $provided)) {
             abort(401, 'Unauthorized');
         }
 

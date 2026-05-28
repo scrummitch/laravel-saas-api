@@ -33,7 +33,20 @@ class Collector extends Model
 
     protected $table = 'stats_collectors';
 
-    protected $guarded = [];
+    protected $fillable = [
+        'uuid',
+        'ulid',
+        'client_id',
+        'agent_id',
+        'anonymous_id',
+        'country',
+        'origin',
+        'browser',
+        'os',
+        // Collector disables Eloquent's UPDATED_AT, so created_at is set
+        // explicitly by the session bootstrap action.
+        'created_at',
+    ];
 
     const UPDATED_AT = null;
 

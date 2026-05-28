@@ -5,7 +5,6 @@ namespace App\Models\Store;
 use App\Billing\CurrencyCast;
 use App\Billing\IntervalCast;
 use App\Database\Traits\HasLookupKey;
-use App\Models\Account\Agent;
 use App\Models\Account\Customer;
 use App\Models\Billing\BillingProvider;
 use App\Models\Convert\CheckoutState;
@@ -70,11 +69,6 @@ class Purchase extends \App\Database\Model
     public function organization()
     {
         return $this->belongsTo(Organization::class);
-    }
-
-    public function agent()
-    {
-        return $this->hasOneThrough(Agent::class, Activity::class, 'id', 'id', 'activity_id', 'id');
     }
 
     public function payment_method()

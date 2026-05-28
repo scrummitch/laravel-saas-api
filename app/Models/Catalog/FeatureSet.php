@@ -23,7 +23,14 @@ class FeatureSet extends Model
     use HasFactory,
         HasNiceUlids;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'organization_id',
+        'module_key',
+        'key',
+        'name',
+        'description',
+        'released_at',
+    ];
 
     protected $table = 'catalog_feature_sets';
 

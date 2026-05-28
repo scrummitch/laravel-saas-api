@@ -12,6 +12,11 @@ use Illuminate\Support\Arr;
 
 class MetricsController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Metric::class, 'metric');
+    }
+
     /**
      * Display a listing of the resource.
      */

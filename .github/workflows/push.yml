@@ -1,56 +1,21 @@
-name: Test, Build and optionally Deploy
+name: Tests
 
 on:
   pull_request:
-    branches:
-      - main
   push:
     branches:
-      - dev
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
+      - main
 
 jobs:
-  set-vars:
-    name: Set Variables
-    runs-on: ubuntu-latest
-
-    outputs:
-      ENV: ${{ steps.output-vars.outputs.ENV }}
-      IMAGE_TAG: ${{ steps.output-vars.outputs.IMAGE_TAG }}
-
-    steps:
-      - name: Set Image Tag (main)
-        id: set-vars-main
-        if: github.event_name == 'push'
-        run: |
-          echo "IMAGE_TAG=latest" >> $GITHUB_ENV
-          echo "ENV=dev" >> $GITHUB_ENV
-
-      - name: Set Image Tag (tag)
-        id: set-vars-tag
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-        run: |
-          IMAGE_TAG=${GITHUB_REF#refs/tags/}
-          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
-          echo "ENV=prod" >> $GITHUB_ENV
-
-      - name: Output Image Tag
-        id: output-vars
-        run: |
-          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_OUTPUT
-          echo "ENV=${ENV}" >> $GITHUB_OUTPUT
-          cat $GITHUB_OUTPUT
-
   laravel-tests:
     name: Test Laravel
     runs-on: ubuntu-latest
 
     env:
-      DB_CONNECTION: mysql
+      DB_CONNECTION: ci
       DB_HOST: 127.0.0.1
-      DB_DATABASE: ci_plandalf
-      DB_USER: root
+      DB_CI_DATABASE: ci_plandalf
+      DB_USERNAME: root
       DB_PASSWORD: root
 
     steps:
@@ -59,331 +24,41 @@ jobs:
           fetch-depth: 1
 
       - name: Set up PHP
-        uses: shivammathur/setup-php@c665c7a15b5295c2488ac8a87af9cb806cd72198 # v2.30.4
+        uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, json, bcmath, curl, fileinfo, mysqli, pdo, pdo_mysql, gd
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          extensions: mbstring, json, bcmath, curl, fileinfo, mysqli, pdo, pdo_mysql, gd, intl, sodium
 
       - name: Start MySQL
         run: |
           sudo /etc/init.d/mysql start
-          mysql -e "CREATE DATABASE IF NOT EXISTS $DB_DATABASE;" -u$DB_USER -p$DB_PASSWORD
+          mysql -e "CREATE DATABASE IF NOT EXISTS $DB_CI_DATABASE;" -u$DB_USERNAME -p$DB_PASSWORD
 
       - name: Get composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Copy .env
-        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+        run: cp .env.example .env
 
       - name: Install dependencies
-        run: composer install --prefer-dist  --no-progress --no-suggest
+        run: composer install --prefer-dist --no-progress --no-interaction
 
       - name: Generate key
         run: php artisan key:generate
 
-      - name: Directory Permissions
-        run: chmod -R 777 storage bootstrap/cache
-
       - name: Run Migrations
-        run: php artisan migrate --force
+        run: php artisan migrate --database=ci --force
 
-      # Cache and uncache so we detect route errors
       - name: Cache and un-cache routes
         run: php artisan route:cache && php artisan route:clear
 
       - name: Run Tests
         run: php artisan test
-
-      - name: Output Laravel Log
-        if: always()
-        run: |
-          echo "Laravel Log Contents:"
-          cat storage/logs/laravel.log || echo "Failed to read Laravel log"
-
-  docker:
-    name: Test and Build Docker
-    runs-on: ubuntu-latest
-    needs: [set-vars, laravel-tests]
-
-    env:
-      APP_KEY: base64:XceUL4Hpdirw6vd09iC/UPt0t91NVfGzAfRVKYhTNLE=
-      DB_DATABASE: api
-      DB_HOST: mysql
-      DB_PASSWORD: api
-      DB_USERNAME: app_api
-      COMPOSE_PROJECT_NAME: app
-      DB_USE_IAM_AUTH: 0
-
-    permissions:
-      contents: read
-      packages: write
-
-    services:
-      docker:
-        image: docker:20.10.7
-        options: --privileged
-
-    outputs:
-      IMAGES: ${{ steps.list-images.outputs.DOCKER_IMAGES }}
-
-    steps:
-      - name: Checkout Code
-        id: checkout
-        uses: actions/checkout@v4
-
-      - name: Write storage/version.yaml file
-        id: write-version
-        run: |
-          IMAGE_TAG="${{ needs.set-vars.outputs.IMAGE_TAG }}"
-          if [ -z "$IMAGE_TAG" ] || [ "$IMAGE_TAG" = "latest" ]; then
-            IMAGE_TAG=$(echo $GITHUB_SHA | cut -c1-7)
-          fi
-          echo "version: $IMAGE_TAG
-          env: ${{ needs.set-vars.outputs.ENV || 'ci' }}" > ./storage/version.yaml
-
-      - name: Verify version file
-        run: cat ./storage/version.yaml
-
-      - name: Build the Docker images
-        id: build
-        run: docker compose build
-
-      - name: Start the services
-        id: compose-up
-        run: docker compose --profile test up -d --wait
-
-      - name: Run ps
-        id: docker-ps
-        run: docker compose ps
-
-      - name: Create .env
-        id: create-env
-        run: docker compose exec -T php-fpm touch /srv/app/.env
-
-      - name: Set Tag
-        id: set-vars
-        run: |
-          echo "IMAGE_TAG=${{ needs.set-vars.outputs.IMAGE_TAG }}" >> $GITHUB_ENV
-
-      - name: Run Migrations
-        id: migrate
-        run: docker compose exec -T php-fpm php /srv/app/artisan migrate --database=mysql --force
-
-      - name: Run tests
-        id: test
-        run: echo "Mitch, please help me to make this work" # docker-compose exec -T php-fpm php /srv/app/artisan test
-
-      - name: Check Nginx Health Endpoint
-        id: healthcheck
-        run: |
-          response=$(curl -s -w "\n%{http_code}" http://localhost:80/health)
-          status_code=$(echo "$response" | tail -n1)
-          body=$(echo "$response" | sed '$d')
-
-          if [ "$status_code" = "200" ]; then
-            echo "Nginx health check passed: /health returned 200"
-          else
-            echo "Nginx health check failed: /health returned $status_code"
-            echo "Response body:"
-            echo "$body"
-            exit 1
-          fi
-
-      - name: Output Laravel Log
-        if: always()
-        run: |
-          echo "Laravel Log Contents:"
-          docker compose exec -T php-fpm cat /srv/app/storage/logs/laravel.log || echo "Failed to read Laravel log"
-
-      - name: Stop the services
-        id: compose-down
-        run: docker compose --profile test down
-
-      - name: Log into GHCR
-        id: ghcr-login
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || startsWith(github.ref, 'refs/tags/'))
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-
-      - name: Prepare Images to GHCR
-        id: tag-ghcr
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || startsWith(github.ref, 'refs/tags/'))
-        run: |
-          docker images
-          docker tag app-nginx ghcr.io/plandalf-labs/api/nginx:${{ env.IMAGE_TAG }}
-          docker tag app-php-fpm ghcr.io/plandalf-labs/api/php-fpm:${{ env.IMAGE_TAG }}
-          docker build --target php-worker --tag ghcr.io/plandalf-labs/api/php-worker:${{ env.IMAGE_TAG }} . # Compose doesn't use this image, so we need to build it here
-
-      - name: Push Images to GHCR
-        id: ghcr-push
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || startsWith(github.ref, 'refs/tags/'))
-        run: |
-          docker push ghcr.io/plandalf-labs/api/nginx:${{ env.IMAGE_TAG }}
-          docker push ghcr.io/plandalf-labs/api/php-fpm:${{ env.IMAGE_TAG }}
-          docker push ghcr.io/plandalf-labs/api/php-worker:${{ env.IMAGE_TAG }}
-
-      - name: List Images
-        id: list-images
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || startsWith(github.ref, 'refs/tags/'))
-        run: |
-          echo "DOCKER_IMAGES<<EOT" >> $GITHUB_OUTPUT
-          echo "Images pushed to GHCR:" >> $GITHUB_OUTPUT
-          docker image list --format 'table * {{.Repository}}:{{.Tag}}' | grep ghcr.io >> $GITHUB_OUTPUT
-          echo -e "\n\nCommit hash: ${{ github.sha }}" >> $GITHUB_OUTPUT
-          echo -e "\nEOT" >> $GITHUB_OUTPUT
-          cat $GITHUB_OUTPUT
-
-  gen_task:
-    name: Generate ECS Task Definition
-    runs-on: ubuntu-latest
-
-    environment: ${{ needs.set-vars.outputs.ENV }}
-
-    needs: [set-vars]
-
-    outputs:
-      task-definition: ${{ steps.save-task-def.outputs.TASK_DEF }}
-
-    steps:
-      - name: Checkout Code
-        id: checkout
-        uses: actions/checkout@v4
-
-      - name: Validate Task Definition
-        id: validate
-        run: jq . task-definition.json
-
-      - name: Set Tag
-        id: set-vars
-        run: echo "IMAGE_TAG=${{ needs.set-vars.outputs.IMAGE_TAG }}" >> $GITHUB_ENV
-
-      - name: Fix Task Definition Role ARNs
-        run: |
-          sed -i "s/\${account_id}/${{ vars.AWS_ACCOUNT_ID }}/g" task-definition.json
-
-      - name: Generate Task Definition - Nginx
-        id: task-def-nginx
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: task-definition.json
-          container-name: nginx
-          image: ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/api-nginx:${{ env.IMAGE_TAG }}
-
-      - name: Generate Task Definition - PHP-FPM
-        id: task-def-php-fpm
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def-nginx.outputs.task-definition }}
-          container-name: php-fpm
-          image: ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/api-php-fpm:${{ env.IMAGE_TAG }}
-
-      - name: Generate Task Definition - PHP Worker
-        id: task-def-php-worker
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def-php-fpm.outputs.task-definition }}
-          container-name: php-worker
-          image: ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/api-php-worker:${{ env.IMAGE_TAG }}
-
-      - name: Output Task Definition
-        id: output-task-def
-        run: cat "${{ steps.task-def-php-worker.outputs.task-definition }}"
-
-      - name: Save Task Definition
-        id: save-task-def
-        run: echo "TASK_DEF=$(cat ${{ steps.task-def-php-worker.outputs.task-definition }} | jq -c '. | tostring')" >> $GITHUB_OUTPUT
-
-  deploy:
-    name: Deploy to AWS
-    runs-on: ubuntu-latest
-
-    needs: [set-vars, docker, gen_task]
-
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || startsWith(github.ref, 'refs/tags/'))
-
-    environment: ${{ needs.set-vars.outputs.ENV }}
-
-    permissions:
-      contents: read
-      id-token: write
-      packages: read
-
-    steps:
-      - name: Set Tag
-        id: set-vars
-        run: echo "IMAGE_TAG=${{ needs.set-vars.outputs.IMAGE_TAG }}" >> $GITHUB_ENV
-
-      - name: Update Task Definition
-        run: echo ${{ needs.gen_task.outputs.task-definition }} | jq > task-definition.json
-
-      - name: Log into GHCR
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-
-      - name: Pull Images from GHCR
-        run: |
-          docker pull ghcr.io/plandalf-labs/api/nginx:${{ env.IMAGE_TAG }}
-          docker pull ghcr.io/plandalf-labs/api/php-fpm:${{ env.IMAGE_TAG }}
-          docker pull ghcr.io/plandalf-labs/api/php-worker:${{ env.IMAGE_TAG }}
-
-      - name: Tag Images for AWS
-        run: |
-          docker tag ghcr.io/plandalf-labs/api/nginx:${{ env.IMAGE_TAG }} ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/api-nginx:${{ env.IMAGE_TAG }}
-          docker tag ghcr.io/plandalf-labs/api/php-fpm:${{ env.IMAGE_TAG }} ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/api-php-fpm:${{ env.IMAGE_TAG }}
-          docker tag ghcr.io/plandalf-labs/api/php-worker:${{ env.IMAGE_TAG }} ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/api-php-worker:${{ env.IMAGE_TAG }}
-
-      - name: AWS Auth
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/app-deployer
-          role-session-name: github-deploy
-          aws-region: us-east-1
-
-      - name: Login to ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          registries: ${{ vars.AWS_ACCOUNT_ID }}
-
-      - name: Push Images to AWS
-        run: |
-          docker push ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/api-nginx:${{ env.IMAGE_TAG }}
-          docker push ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/api-php-fpm:${{ env.IMAGE_TAG }}
-          docker push ${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/api-php-worker:${{ env.IMAGE_TAG }}
-
-      - name: Deploy to AWS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: task-definition.json
-          service: api
-          cluster: api
-          # wait-for-service-stability: true # Disabled until deployments are working properly.
-
-  release:
-    name: Create Release
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-
-    needs: [set-vars, docker, deploy]
-
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-    steps:
-      - name: Checkout Code
-        id: checkout
-        uses: actions/checkout@v4
-
-      - name: Create Release
-        run: |
-          gh release create --verify-tag --title ${{ needs.set-vars.outputs.IMAGE_TAG }} --notes "${{ needs.docker.outputs.IMAGES }}" ${{ needs.set-vars.outputs.IMAGE_TAG }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}

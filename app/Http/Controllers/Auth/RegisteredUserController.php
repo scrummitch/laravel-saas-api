@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Management\Organization;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
@@ -26,29 +27,14 @@ class RegisteredUserController extends Controller
             'password' => ['required', Password::defaults()],
             'invite_code' => [
                 'required',
-                function ($attr, $value, $fail) {
-                    if ($value === 'mellon') {
-                        return;
-                    }
-
-                    if (Organization::query()->where('invite_code', $value)->exists()) {
-                        return;
-                    }
-
-                    $fail('Invalid invite code');
-                },
+                'string',
+                'exists:organizations,invite_code',
             ],
         ]);
 
-        if (Arr::get($validated, 'invite_code') === 'mellon') {
-            $org = new Organization;
-            $org->name = 'New Organization';
-            $org->save();
-        } else {
-            $org = Organization::query()
-                ->where('invite_code', Arr::get($validated, 'invite_code'))
-                ->firstOrFail();
-        }
+        $org = Organization::query()
+            ->where('invite_code', Arr::get($validated, 'invite_code'))
+            ->firstOrFail();
 
         $user = User::create([
             'email' => $request->email,
@@ -59,7 +45,7 @@ class RegisteredUserController extends Controller
             'role' => 'owner',
         ]);
 
-        //        event(new Registered($user));
+        event(new Registered($user));
 
         Auth::login($user);
 

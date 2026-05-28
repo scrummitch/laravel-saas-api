@@ -59,7 +59,26 @@ class Activity extends Model
 
     protected $table = 'intel_activities';
 
-    protected $guarded = [];
+    protected $fillable = [
+        'uuid',
+        'parent_id',
+        'scenario_id',
+        'client_id',
+        'collector_id',
+        'customer_id',
+        'agent_id',
+        'handler_id',
+        'has_entered',
+        'has_started',
+        'has_completed',
+        'result_code',
+        'result_message',
+        'error_reason',
+        'started_at',
+        'finished_at',
+        'last_interaction_at',
+        'current_state',
+    ];
 
     protected $casts = [
         'has_entered' => 'boolean',

@@ -20,6 +20,20 @@ class IntegrationOAuthController extends Controller
 
         abort_if(! $state, 404, 'Invalid state');
 
+        $stateOrgId = Arr::get($state, 'organization_id');
+        $user = $request->user();
+
+        abort_if(! $user, 401, 'Unauthenticated');
+
+        $isMember = $user->organizations()
+            ->wherePivot('organization_id', $stateOrgId)
+            ->exists();
+
+        if (! $isMember) {
+            Cache::forget($request->input('state'));
+            abort(403, 'You are not a member of this organization');
+        }
+
         $uri = new Uri(Arr::get($state, 'redirect_uri'));
         $query = Query::parse($uri->getQuery());
 
