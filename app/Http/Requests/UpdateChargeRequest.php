@@ -32,6 +32,8 @@ class UpdateChargeRequest extends FormRequest
      */
     public function rules(): array
     {
+        $orgId = $this->user()->currentOrganization->id;
+
         return [
             'name' => [
                 'required',
@@ -66,7 +68,8 @@ class UpdateChargeRequest extends FormRequest
             ],
             'product' => [
                 'nullable',
-                Rule::exists('catalog_products', 'id'),
+                Rule::exists('catalog_products', 'id')
+                    ->where('organization_id', $orgId),
             ],
         ];
     }

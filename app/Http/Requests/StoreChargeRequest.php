@@ -34,6 +34,8 @@ class StoreChargeRequest extends FormRequest
      */
     public function rules(): array
     {
+        $orgId = $this->user()->currentOrganization->id;
+
         return [
             'name' => [
                 'required',
@@ -49,7 +51,8 @@ class StoreChargeRequest extends FormRequest
             ],
             'metric' => [
                 'nullable',
-                Rule::exists('usage_metrics', 'id'),
+                Rule::exists('usage_metrics', 'id')
+                    ->where('organization_id', $orgId),
             ],
             'minimum_billable_usage' => [
                 'nullable',
@@ -63,7 +66,8 @@ class StoreChargeRequest extends FormRequest
             ],
             'product' => [
                 'nullable',
-                Rule::exists('catalog_products', 'id'),
+                Rule::exists('catalog_products', 'id')
+                    ->where('organization_id', $orgId),
             ],
             'amount' => [
                 'required_if:type,standard,one_time',
