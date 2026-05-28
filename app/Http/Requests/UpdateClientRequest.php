@@ -18,9 +18,11 @@ class UpdateClientRequest extends FormRequest
 
     protected function prepareForValidation()
     {
-        $this->merge([
-            'billing_provider_id' => BillingProvider::retrieve($this->input('billing_provider_id'))?->id,
-        ]);
+        if ($this->has('billing_provider_id')) {
+            $this->merge([
+                'billing_provider_id' => BillingProvider::retrieve($this->input('billing_provider_id'))?->id,
+            ]);
+        }
     }
 
     /**
