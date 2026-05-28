@@ -12,6 +12,7 @@ use App\Models\Twin;
 use App\Services\BaseService;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Stripe\ConfirmationToken;
 use Stripe\Exception\ApiErrorException;
@@ -84,10 +85,22 @@ class InitializePaymentMethodService extends BaseService
             ], Twin::fromStripeObject($pm)->toArray());
         Twin::reguard();
 
-        $pms = $customer->payment_methods ?? [];
-        array_push($pms, $pmTwin->id);
-        $customer->payment_methods = $pms;
-        $customer->save();
+        DB::transaction(function () use ($customer, $pmTwin) {
+            $locked = Customer::query()
+                ->whereKey($customer->id)
+                ->lockForUpdate()
+                ->first();
+
+            $pms = $locked->payment_methods ?? [];
+
+            if (! in_array($pmTwin->id, $pms, true)) {
+                $pms[] = $pmTwin->id;
+                $locked->payment_methods = $pms;
+                $locked->save();
+            }
+
+            $customer->payment_methods = $pms;
+        });
 
         // Transaction -> Purchase
         $this->purchase->payment_method_id = $pmTwin->id;
