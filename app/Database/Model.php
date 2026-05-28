@@ -23,7 +23,16 @@ class Model extends EloquentModel
         }
 
         if (is_int($id)) {
-            return (new static)->query()->find($id);
+            $instance = new static;
+            $query = $instance->query();
+
+            if (request()->is('v1/*')
+                && ! in_array(static::class, [Organization::class])
+                && method_exists($instance, 'organization')) {
+                $query->where('organization_id', request()->user()?->organization_id);
+            }
+
+            return $query->find($id);
         }
 
         return (new static)->resolveRouteBinding($id);

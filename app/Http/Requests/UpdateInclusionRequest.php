@@ -16,9 +16,13 @@ class UpdateInclusionRequest extends FormRequest
 
     protected function prepareForValidation()
     {
-        $this->merge([
-            'metric' => Metric::retrieve($this->input('metric'))?->id,
-        ]);
+        $input = $this->input('metric');
+
+        if (! is_null($input)) {
+            $this->merge([
+                'metric' => Metric::retrieve($input)?->id ?? $input,
+            ]);
+        }
     }
 
     /**
