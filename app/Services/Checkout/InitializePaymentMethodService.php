@@ -127,7 +127,7 @@ class InitializePaymentMethodService extends BaseService
         // todo:
 
         // todo: check coupon exists?
-        $agent = $this->purchase->agent;
+        $agent = $this->purchase->activity?->agent;
 
         if (!is_null($agent)) {
             $agent->associateWithCustomer($customer);
