@@ -27,7 +27,6 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use GuzzleHttp\Psr7\Uri;
 use Illuminate\Support\Str;
-use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 /**
@@ -70,7 +69,7 @@ class ClientTest extends TestCase
         ]);
         $forbiddenResponse->assertStatus(401);
 
-        Sanctum::actingAs($owner);
+        $this->actingAs($owner);
 
         $validationResponse = $this->postJson(route('api/clients.store'), [
             'name' => 'Test Client',

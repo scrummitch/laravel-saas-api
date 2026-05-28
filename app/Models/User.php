@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Database\Traits\HasNiceUlids;
 use App\Models\Management\Membership;
 use App\Models\Management\Organization;
-use DateTimeInterface;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,8 +12,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Laravel\Sanctum\NewAccessToken;
 
 /**
  * @property int $id
@@ -35,8 +32,7 @@ use Laravel\Sanctum\NewAccessToken;
  */
 class User extends Authenticatable
 {
-    use HasApiTokens,
-        HasFactory,
+    use HasFactory,
         HasNiceUlids,
         MustVerifyEmail,
         Notifiable;
@@ -122,18 +118,4 @@ class User extends Authenticatable
             ->wherePivotNull('revoked_at');
     }
 
-    public function createToken(string $name, array $abilities = ['*'], DateTimeInterface $expiresAt = null)
-    {
-        $plainTextToken = $this->generateTokenString();
-
-        $token = $this->tokens()->create([
-            'name' => $name,
-            'token' => hash('sha256', $plainTextToken),
-            'abilities' => $abilities,
-            'expires_at' => $expiresAt,
-            'hash' => hash('sha256', $plainTextToken),
-        ]);
-
-        return new NewAccessToken($token, $token->getKey().'|'.$plainTextToken);
-    }
 }

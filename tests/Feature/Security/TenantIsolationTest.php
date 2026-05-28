@@ -7,7 +7,6 @@ use App\Models\Catalog\Product;
 use App\Models\Client;
 use App\Models\Usage\Metric;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 /**
@@ -57,7 +56,7 @@ class TenantIsolationTest extends TestCase
 
         $clientFromB = Client::factory()->for($orgB)->create();
 
-        Sanctum::actingAs($userA);
+        $this->actingAs($userA);
 
         $response = $this->getJson('/v1/clients/'.$clientFromB->getRouteKey());
 
@@ -70,7 +69,7 @@ class TenantIsolationTest extends TestCase
 
         $clientFromB = Client::factory()->for($orgB)->create();
 
-        Sanctum::actingAs($userA);
+        $this->actingAs($userA);
 
         $response = $this->deleteJson('/v1/clients/'.$clientFromB->getRouteKey());
 
@@ -85,7 +84,7 @@ class TenantIsolationTest extends TestCase
         $mine = Client::factory()->for($orgA)->create(['name' => 'mine']);
         Client::factory()->for($orgB)->create(['name' => 'not mine']);
 
-        Sanctum::actingAs($userA);
+        $this->actingAs($userA);
 
         $response = $this->getJson('/v1/clients')->assertStatus(200);
 
@@ -103,7 +102,7 @@ class TenantIsolationTest extends TestCase
     {
         [, $orgB, $userA] = $this->twoOrgsAndUsers();
 
-        Sanctum::actingAs($userA);
+        $this->actingAs($userA);
 
         $this->patchJson('/v1/users/me', [
             'last_organization_id' => $orgB->id,
@@ -118,7 +117,7 @@ class TenantIsolationTest extends TestCase
         $secondOrg = $this->createOrg();
         $secondOrg->users()->attach($userA, ['role' => 'member']);
 
-        Sanctum::actingAs($userA);
+        $this->actingAs($userA);
 
         $this->patchJson('/v1/users/me', [
             'last_organization_id' => $secondOrg->id,
@@ -136,7 +135,7 @@ class TenantIsolationTest extends TestCase
 
         $foreignProduct = Product::factory()->for($orgB)->create();
 
-        Sanctum::actingAs($userA);
+        $this->actingAs($userA);
 
         $this->postJson('/v1/pricing/plans/'.$plan->getRouteKey().'/inclusions', [
             'product' => $foreignProduct->getRouteKey(),
@@ -154,7 +153,7 @@ class TenantIsolationTest extends TestCase
         $foreignFeature = Feature::factory()->for($orgB)->create();
         $foreignMetric = Metric::factory()->for($orgB)->for($foreignFeature)->create();
 
-        Sanctum::actingAs($userA);
+        $this->actingAs($userA);
 
         $this->patchJson('/v1/pricing/plans/'.$plan->getRouteKey().'/inclusions/'.$inclusion->getRouteKey(), [
             'metric' => $foreignMetric->id,

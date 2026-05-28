@@ -3,7 +3,6 @@
 namespace Tests\Feature\Security;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 /**
@@ -31,14 +30,14 @@ class AuthGuardsTest extends TestCase
 
     public function test_users_me_returns_200_when_authenticated(): void
     {
-        Sanctum::actingAs($this->createUser());
+        $this->actingAs($this->createUser());
 
         $this->getJson('/v1/users/me')->assertStatus(200);
     }
 
     public function test_security_headers_are_present_on_authed_responses(): void
     {
-        Sanctum::actingAs($this->createUser());
+        $this->actingAs($this->createUser());
 
         $response = $this->getJson('/v1/users/me');
 

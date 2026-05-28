@@ -7,7 +7,6 @@ use App\Http\Controllers\API\BillingProvidersController;
 use App\Http\Controllers\API\ChargesController;
 use App\Http\Controllers\API\ClientsController;
 use App\Http\Controllers\API\CreateIntegrationAuthorizationController;
-use App\Http\Controllers\API\CreateSanctumTokenController;
 use App\Http\Controllers\API\CustomersController;
 use App\Http\Controllers\API\CustomerUsageController;
 use App\Http\Controllers\API\Dashboard\DashboardActivitiesController;
@@ -46,8 +45,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/users/me', [UserController::class, 'show'])->name('users.me');
 Route::get('/user', [UserController::class, 'show']);
-
-Route::post('/sanctum/token', CreateSanctumTokenController::class)->name('sanctum.token');
 
 Route::prefix('/dashboard')->name('dashboard.')->group(function () {
     Route::get('/stats', DashboardStatsAction::class)->name('stats');

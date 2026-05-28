@@ -4,7 +4,6 @@ namespace Tests\Feature\Security;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\URL;
-use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 /**
@@ -19,7 +18,7 @@ class MediaUploadTest extends TestCase
 
     public function test_assets_post_with_disallowed_extension_returns_422(): void
     {
-        Sanctum::actingAs($this->createUser());
+        $this->actingAs($this->createUser());
 
         $this->postJson('/v1/media/assets', [
             'original_name' => 'evil.php',
@@ -30,7 +29,7 @@ class MediaUploadTest extends TestCase
 
     public function test_assets_post_with_allowed_extension_succeeds(): void
     {
-        Sanctum::actingAs($this->createUser());
+        $this->actingAs($this->createUser());
 
         $this->postJson('/v1/media/assets', [
             'original_name' => 'logo.png',
@@ -41,7 +40,7 @@ class MediaUploadTest extends TestCase
 
     public function test_client_supplied_bucket_is_ignored(): void
     {
-        Sanctum::actingAs($this->createUser());
+        $this->actingAs($this->createUser());
 
         // Pin the operator-controlled bucket to a distinct value so we can
         // assert the request-supplied one isn't smuggled through.
@@ -61,7 +60,7 @@ class MediaUploadTest extends TestCase
 
     public function test_upload_endpoint_rejects_paths_outside_assets(): void
     {
-        Sanctum::actingAs($this->createUser());
+        $this->actingAs($this->createUser());
 
         // Signed URL with a path that tries to escape the assets/ subtree.
         // The signature covers `path` so external manipulation is normally
@@ -78,7 +77,7 @@ class MediaUploadTest extends TestCase
 
     public function test_upload_endpoint_rejects_paths_with_backslashes(): void
     {
-        Sanctum::actingAs($this->createUser());
+        $this->actingAs($this->createUser());
 
         $url = URL::temporarySignedRoute('api/media.uploads.store', now()->addMinutes(5), [
             'key' => 'asset',
